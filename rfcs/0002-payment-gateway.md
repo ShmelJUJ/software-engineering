@@ -82,10 +82,10 @@ in the topic `transaction.finished`
 **Golang SDK**: https://developer.algorand.org/docs/sdks/go/
 
 **Possibilities:**
-1. Create account with `GenerateAccount()` method
+1. Create account with `GenerateAccount` method
 2. Check balance with `algodClient.AccountInformation(acct.Address.String()).Do(context.Background())` method
-3. Create transaction with `transaction.MakePaymentTxn(acct.Address.String(), acct.Address.String(), 100000, nil, "", sp)`, sign transaction with `crypto.SignTransaction(acct.PrivateKey, ptxn)` and send transaction with `algodClient.SendRawTransaction(sptxn).Do(context.Background())` methods
-4. Check status with `transaction.WaitForConfirmation(algodClient, pendingTxID, 4, context.Background())` method
+3. Create transaction with `transaction.MakePaymentTxn`, sign transaction with `crypto.SignTransaction(acct.PrivateKey, ptxn)` and send transaction with `algodClient.SendRawTransaction(sptxn).Do(context.Background())` methods
+4. Check status with `transaction.WaitForConfirmation` method
 
 **Required data:**
 1. Sender's wallet address
