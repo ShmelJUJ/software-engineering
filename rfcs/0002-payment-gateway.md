@@ -49,7 +49,7 @@ type transactionWorker struct {
 }
 ```
 
-In separate files, we describe the implementation of the `PaymentGateway` interface, for example, `YoukassaGateway` or `AlgorandGateway`
+In separate files, we describe the implementation of the `PaymentGateway` interface, for example, `YookassaGateway` or `AlgorandGateway`
 
 Each worker must have an event channel associated with it in order, for example, to stop processing a transaction if the client clicked cancel the operation
 
