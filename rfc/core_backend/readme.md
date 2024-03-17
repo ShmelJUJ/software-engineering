@@ -128,7 +128,7 @@ POST ```api/v1/payment/{id}/cancel```
 400 - validation error or status is bank_processing
 500
 
-POST ```api/v1/payment/{id}/cancel```
+POST ```api/v1/payment/{id}/edit```
 
 {
     "idempotency_token": uuid,
@@ -143,3 +143,15 @@ POST ```api/v1/payment/{id}/cancel```
 400 - validation error or status is bank_processing
 500
 
+POST POST ```api/v1/payment/{id}/accept```
+
+{
+    "idempotency_token": uuid,
+    "accept_info":{
+        // TODO узгать у Соболева что тут будет лежать
+    }
+}
+
+200 - ok
+400 - validation error
+500
