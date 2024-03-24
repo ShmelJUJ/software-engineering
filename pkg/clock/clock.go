@@ -18,11 +18,11 @@ func New() Clock {
 }
 
 // NowUTC returns the current time in UTC timezone.
-func (*clock) NowUTC() time.Time {
+func (clock) NowUTC() time.Time {
 	return time.Now().UTC()
 }
 
 // NowUnix returns the current time as Unix timestamp.
-func (*clock) NowUnix() int64 {
+func (clock) NowUnix() int64 {
 	return time.Now().Unix()
 }
