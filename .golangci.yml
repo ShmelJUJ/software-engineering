@@ -178,6 +178,16 @@ linters:
     # Finds wasted assignment statements.
     - wastedassign
 
+    # Forces you to use empty lines. Great if configured correctly.
+    # I mean there is an agreement in a team.
+    - wsl
+
+    # Reports magic consts. Might be noisy but still good.
+    - gomnd
+
+    # I'm fine to check the error from json.Marshal ¯\_(ツ)_/¯
+    - errchkjson
+
   disable:
     # Detects struct contained context.Context field. Not a problem.
     - containedctx
@@ -208,9 +218,6 @@ linters:
     
     # Find duplicate words, rare.
     - dupword
-
-    # I'm fine to check the error from json.Marshal ¯\_(ツ)_/¯
-    - errchkjson
     
     # All SQL queries MUST BE covered with tests.
     - execinquery
@@ -258,9 +265,6 @@ linters:
 
     # 1st Go linter, deprecated :( use `revive`.
     - golint
-
-    # Reports magic consts. Might be noisy but still good.
-    - gomnd
    
     # Allowed/blocked packages to import. I prefer to do it manually.
     - gomodguard
@@ -333,10 +337,7 @@ linters:
 
     # Don't find it useful to wrap all errors from external packages.
     - wrapcheck
-    
-    # Forces you to use empty lines. Great if configured correctly.
-    # I mean there is an agreement in a team.
-    - wsl
+
 
 linters-settings:
   # I'm biased and I'm enabling more than 100 checks

@@ -11,12 +11,17 @@ import (
 
 //go:generate mockgen -package mocks -destination mocks/subscriber_mocks.go github.com/ThreeDotsLabs/watermill/message Subscriber
 
+const (
+	defaultNumPartitions     = 1
+	defaultReplicationFactor = 2
+)
+
 var defaultSubscriberConfig = kafka.SubscriberConfig{
 	Unmarshaler:   kafka.DefaultMarshaler{},
 	ConsumerGroup: watermill.NewUUID(),
 	InitializeTopicDetails: &sarama.TopicDetail{
-		NumPartitions:     1,
-		ReplicationFactor: 2,
+		NumPartitions:     defaultNumPartitions,
+		ReplicationFactor: defaultReplicationFactor,
 	},
 }
 
