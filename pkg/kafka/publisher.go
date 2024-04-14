@@ -2,13 +2,20 @@ package kafka
 
 import (
 	"fmt"
+	"time"
 
 	"github.com/IBM/sarama"
+	"github.com/ShmelJUJ/software-engineering/pkg/logger"
 	"github.com/ThreeDotsLabs/watermill-kafka/v3/pkg/kafka"
 	"github.com/ThreeDotsLabs/watermill/message"
 )
 
 //go:generate mockgen -package mocks -destination mocks/publisher_mocks.go github.com/ThreeDotsLabs/watermill/message Publisher
+
+const (
+	defaultConnAttemts = 10
+	defaultConnTimeout = time.Second
+)
 
 var defaultPublisherConfig = kafka.PublisherConfig{
 	Marshaler: kafka.DefaultMarshaler{},
@@ -54,13 +61,37 @@ func NewPublisher(brokers []string, opts ...PublisherOption) (message.Publisher,
 	publisherConfig := defaultPublisherConfig
 	publisherConfig.Brokers = brokers
 
+	connAttempts := defaultConnAttemts
+	connTimeout := defaultConnTimeout
+
+	log, err := logger.NewLogrusLogger("info")
+	if err != nil {
+		return nil, fmt.Errorf("failed to create new logger: %w", err)
+	}
+
 	for _, opt := range opts {
 		if err := opt(&publisherConfig); err != nil {
 			return nil, fmt.Errorf("failed to apply option: %w", err)
 		}
 	}
 
-	publisher, err := kafka.NewPublisher(publisherConfig, defaultLogger)
+	var publisher message.Publisher
+
+	for connAttempts > 0 {
+		publisher, err = kafka.NewPublisher(publisherConfig, defaultLogger)
+		if err == nil {
+			break
+		}
+
+		log.Info("Publisher is trying to connect...", map[string]interface{}{
+			"attempts_left": connAttempts,
+		})
+
+		time.Sleep(connTimeout)
+
+		connAttempts--
+	}
+
 	if err != nil {
 		return nil, fmt.Errorf("failed to create a new publisher: %w", err)
 	}

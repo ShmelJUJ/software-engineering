@@ -1,6 +1,6 @@
 CURDIR=$(shell pwd)
 BINDIR=${CURDIR}/bin
-GOVER=$(shell go version | perl -nle '/(go\d\S+)/; print $$1;')
+GOVER=$(shell go version | perl -nle '/(go\d+\.\d+)/; print $$1;')
 
 SMARTIMPORTSVER=v0.2.0
 SMARTIMPORTSBIN=${BINDIR}/smartimports_${GOVER}
