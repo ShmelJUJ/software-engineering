@@ -28,20 +28,6 @@ services:
       retries: 3
     ports:
       - "2181:2181"
-
-  # kafka:
-  #   image: confluentinc/cp-kafka:7.6.0
-  #   restart: unless-stopped
-  #   container_name: kafka
-  #   depends_on:
-  #     - zookeeper
-  #   environment:
-  #     KAFKA_LOG_RETENTION_MINUTES: 1440
-  #     KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
-  #     KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT
-  #     KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
-  #     KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
-  #     KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
   
   kafka:
     image: confluentinc/cp-kafka:7.6.0
