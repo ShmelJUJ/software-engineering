@@ -14,34 +14,34 @@ import (
 	"github.com/pwnedgod/wracha/logger/std"
 )
 
-// MiddlewareManager represents a manager for HTTP middlewares.
-type MiddlewareManager struct {
+// Manager represents a manager for HTTP middlewares.
+type Manager struct {
 	cfg   *Config
 	log   logger.Logger
-	redis *redis.Redis
+	r     *redis.Redis
 	chain alice.Chain
 }
 
 // NewMiddlewareManager creates a new instance of MiddlewareManager.
-func NewMiddlewareManager(cfg *Config, log logger.Logger, redis *redis.Redis) (*MiddlewareManager, error) {
+func NewMiddlewareManager(cfg *Config, log logger.Logger, r *redis.Redis) (*Manager, error) {
 	cfg, err := mergeWithDefault(cfg)
 	if err != nil {
 		return nil, fmt.Errorf("failed to set default config: %w", err)
 	}
 
-	return &MiddlewareManager{
+	return &Manager{
 		cfg:   cfg,
 		log:   log,
-		redis: redis,
+		r:     r,
 		chain: alice.New(),
 	}, nil
 }
 
 // AddIdempotenceMiddleware adds idempotence middleware to the middleware chain.
-func (mm *MiddlewareManager) AddIdempotenceMiddleware() {
+func (mm *Manager) AddIdempotenceMiddleware() {
 	middleware := idemgotent.Middleware(
 		mm.cfg.IdempotencyCfg.Name,
-		idemgotent.WithAdapter(goredis.NewAdapter(mm.redis.Client)),
+		idemgotent.WithAdapter(goredis.NewAdapter(mm.r.Client)),
 		idemgotent.WithLogger(std.NewLogger()),
 		idemgotent.WithKeySource(idemgotent.HeaderKeySource(mm.cfg.IdempotencyCfg.HeaderKey)),
 	)
@@ -50,7 +50,7 @@ func (mm *MiddlewareManager) AddIdempotenceMiddleware() {
 }
 
 // SetupGlobalMiddleware sets up global middleware based on Swagger specification.
-func (mm *MiddlewareManager) SetupGlobalMiddleware(swaggerSpec *loads.Document, api *operations.TransactionAPI) {
+func (mm *Manager) SetupGlobalMiddleware(swaggerSpec *loads.Document, api *operations.TransactionAPI) {
 	globalMiddleware := func(h http.Handler) http.Handler {
 		return mm.chain.Then(h)
 	}

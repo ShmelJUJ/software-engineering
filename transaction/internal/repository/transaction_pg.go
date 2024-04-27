@@ -49,6 +49,7 @@ func (repo *transactionRepo) GetTransaction(ctx context.Context, transactionID s
 	}
 
 	var transaction *model.Transaction
+
 	if err = repo.pg.TrManager.Do(ctx, func(ctx context.Context) error {
 		transactionConn := repo.pg.GetTransactionConn(ctx)
 
@@ -125,11 +126,11 @@ func (repo *transactionRepo) CreateTransaction(ctx context.Context, transaction 
 	if err = repo.pg.TrManager.Do(ctx, func(ctx context.Context) error {
 		transactionConn := repo.pg.GetTransactionConn(ctx)
 
-		if err = repo.createTransactionUserInTx(ctx, transaction.Receiver); err != nil {
+		if err := repo.createTransactionUserInTx(ctx, transaction.Receiver); err != nil {
 			return err
 		}
 
-		if _, err = transactionConn.Exec(ctx, sqlQuery, args...); err != nil {
+		if _, err := transactionConn.Exec(ctx, sqlQuery, args...); err != nil {
 			return err
 		}
 
@@ -178,7 +179,7 @@ func (repo *transactionRepo) GetTransactionStatus(ctx context.Context, transacti
 }
 
 // CancelTransaction cancels a transaction with a specified reason.
-func (repo *transactionRepo) CancelTransaction(ctx context.Context, transactionID string, reason string) error {
+func (repo *transactionRepo) CancelTransaction(ctx context.Context, transactionID, reason string) error {
 	query := cancelTransactionQuery(transactionID, reason)
 
 	sqlQuery, args, err := query.ToSql()

@@ -74,7 +74,7 @@ func Run(cfg *config.Config) {
 	}
 	defer pg.Close()
 
-	redis, err := redis.New(ctx, &redis.Config{
+	r, err := redis.New(ctx, &redis.Config{
 		ConnURL: cfg.RedisCfg.URL,
 	})
 	if err != nil {
@@ -82,7 +82,7 @@ func Run(cfg *config.Config) {
 			"error": err,
 		})
 	}
-	defer redis.Close()
+	defer r.Close()
 
 	kafkaPublisher, err := kafka.NewPublisher(cfg.PublisherCfg.Brokers)
 	if err != nil {
@@ -122,7 +122,7 @@ func Run(cfg *config.Config) {
 			Name:      cfg.MiddlewareCfg.IdempotenctCfg.Name,
 			HeaderKey: cfg.MiddlewareCfg.IdempotenctCfg.HeaderKey,
 		},
-	}, l, redis)
+	}, l, r)
 	if err != nil {
 		l.Fatal("failed to create middleware manager", map[string]interface{}{
 			"error": err,
@@ -134,7 +134,14 @@ func Run(cfg *config.Config) {
 
 	server := restapi.NewServer(api)
 	server.EnabledListeners = []string{"unix", "http"}
-	defer server.Shutdown()
+
+	defer func() {
+		if err := server.Shutdown(); err != nil {
+			l.Error("failed to shutdown server", map[string]interface{}{
+				"error": err,
+			})
+		}
+	}()
 
 	server.ConfigureAPI()
 
@@ -146,6 +153,7 @@ func Run(cfg *config.Config) {
 			})
 		}
 	}()
+
 	defer func() {
 		if err := server.Shutdown(); err != nil {
 			l.Error("failed to shutdown server", map[string]interface{}{

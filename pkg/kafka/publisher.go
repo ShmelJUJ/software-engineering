@@ -91,6 +91,7 @@ func NewPublisher(brokers []string, opts ...PublisherOption) (message.Publisher,
 
 		connAttempts--
 	}
+
 	if err != nil {
 		return nil, fmt.Errorf("failed to create a new publisher: %w", err)
 	}

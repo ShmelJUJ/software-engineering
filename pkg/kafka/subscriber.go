@@ -105,6 +105,7 @@ func NewSubscriber(brokers []string, opts ...SubscriberOption) (message.Subscrib
 
 		connAttempts--
 	}
+
 	if err != nil {
 		return nil, fmt.Errorf("failed to create a new subscriber: %w", err)
 	}

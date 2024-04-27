@@ -115,7 +115,7 @@ func TestPublishSucceededTransaction(t *testing.T) {
 				})
 				mp.EXPECT().Publish(testTransactionProcessedTopic, gomock.Any()).Return(someErr).Times(1)
 			},
-			expectedErr: NewPublishSucceededTransactionError("failed to publish succeded transaction", someErr),
+			expectedErr: NewPublishSucceededTransactionError("failed to publish succeeded transaction", someErr),
 		},
 	}
 

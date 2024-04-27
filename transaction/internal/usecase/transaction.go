@@ -17,7 +17,7 @@ type TransactionUsecase interface {
 	GetTransaction(ctx context.Context, transactionID string) (*model.Transaction, error)
 	CreateTransaction(ctx context.Context, transaction *model.Transaction) error
 	GetTransactionStatus(ctx context.Context, transactionID string) (model.TransactionStatus, error)
-	CancelTransaction(ctx context.Context, transactionID string, reason string) error
+	CancelTransaction(ctx context.Context, transactionID, reason string) error
 	AcceptTransaction(ctx context.Context, transactionID string, sender *model.TransactionUser) error
 	ChangeTransactionStatus(ctx context.Context, transactionID string, status model.TransactionStatus) error
 	UpdateTransaction(ctx context.Context, updatedTransaction *model.Transaction) error
@@ -70,7 +70,7 @@ func (usecase *transactionUsecase) GetTransactionStatus(ctx context.Context, tra
 }
 
 // CancelTransaction cancels a transaction with a specified reason.
-func (usecase *transactionUsecase) CancelTransaction(ctx context.Context, transactionID string, reason string) error {
+func (usecase *transactionUsecase) CancelTransaction(ctx context.Context, transactionID, reason string) error {
 	usecase.log.Debug("Cancel transaction usecase", map[string]interface{}{
 		"transaction_id": transactionID,
 		"reason":         reason,

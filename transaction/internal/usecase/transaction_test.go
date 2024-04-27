@@ -51,7 +51,7 @@ func TestGetTransaction(t *testing.T) {
 	testcases := []struct {
 		name                string
 		args                args
-		mock                func(*mock_logger.MockLogger, *mock_repo.MockTransactionRepo, *mock_publisher.MockTransactionPublisher)
+		mock                func(*mock_logger.MockLogger, *mock_repo.MockTransactionRepo)
 		expectedTransaction *model.Transaction
 		expectedErr         error
 	}{
@@ -61,7 +61,7 @@ func TestGetTransaction(t *testing.T) {
 				ctx:           ctx,
 				transactionID: transactionID,
 			},
-			mock: func(ml *mock_logger.MockLogger, mtr *mock_repo.MockTransactionRepo, mtp *mock_publisher.MockTransactionPublisher) {
+			mock: func(ml *mock_logger.MockLogger, mtr *mock_repo.MockTransactionRepo) {
 				ml.EXPECT().Debug("Get transaction usecase", map[string]interface{}{
 					"transaction_id": transactionID,
 				})
@@ -76,7 +76,7 @@ func TestGetTransaction(t *testing.T) {
 				ctx:           ctx,
 				transactionID: transactionID,
 			},
-			mock: func(ml *mock_logger.MockLogger, mtr *mock_repo.MockTransactionRepo, mtp *mock_publisher.MockTransactionPublisher) {
+			mock: func(ml *mock_logger.MockLogger, mtr *mock_repo.MockTransactionRepo) {
 				ml.EXPECT().Debug("Get transaction usecase", map[string]interface{}{
 					"transaction_id": transactionID,
 				})
@@ -94,7 +94,7 @@ func TestGetTransaction(t *testing.T) {
 			t.Parallel()
 
 			l, repo, publisher := transactionHelper(t)
-			testcase.mock(l, repo, publisher)
+			testcase.mock(l, repo)
 
 			transactionUsecase := usecase.NewTransactionUsecase(repo, publisher, l)
 
@@ -127,7 +127,7 @@ func TestCreateTransaction(t *testing.T) {
 	testcases := []struct {
 		name        string
 		args        args
-		mock        func(*mock_logger.MockLogger, *mock_repo.MockTransactionRepo, *mock_publisher.MockTransactionPublisher)
+		mock        func(*mock_logger.MockLogger, *mock_repo.MockTransactionRepo)
 		expectedErr error
 	}{
 		{
@@ -136,7 +136,7 @@ func TestCreateTransaction(t *testing.T) {
 				ctx:         ctx,
 				transaction: transaction,
 			},
-			mock: func(ml *mock_logger.MockLogger, mtr *mock_repo.MockTransactionRepo, mtp *mock_publisher.MockTransactionPublisher) {
+			mock: func(ml *mock_logger.MockLogger, mtr *mock_repo.MockTransactionRepo) {
 				ml.EXPECT().Debug("Create transaction usecase", map[string]interface{}{
 					"transaction": transaction,
 				})
@@ -150,7 +150,7 @@ func TestCreateTransaction(t *testing.T) {
 				ctx:         ctx,
 				transaction: transaction,
 			},
-			mock: func(ml *mock_logger.MockLogger, mtr *mock_repo.MockTransactionRepo, mtp *mock_publisher.MockTransactionPublisher) {
+			mock: func(ml *mock_logger.MockLogger, mtr *mock_repo.MockTransactionRepo) {
 				ml.EXPECT().Debug("Create transaction usecase", map[string]interface{}{
 					"transaction": transaction,
 				})
@@ -167,7 +167,7 @@ func TestCreateTransaction(t *testing.T) {
 			t.Parallel()
 
 			l, repo, publisher := transactionHelper(t)
-			testcase.mock(l, repo, publisher)
+			testcase.mock(l, repo)
 
 			transactionUsecase := usecase.NewTransactionUsecase(repo, publisher, l)
 
@@ -196,7 +196,7 @@ func TestGetTransactionStatus(t *testing.T) {
 	testcases := []struct {
 		name                      string
 		args                      args
-		mock                      func(*mock_logger.MockLogger, *mock_repo.MockTransactionRepo, *mock_publisher.MockTransactionPublisher)
+		mock                      func(*mock_logger.MockLogger, *mock_repo.MockTransactionRepo)
 		expectedTransactionStatus model.TransactionStatus
 		expectedErr               error
 	}{
@@ -206,7 +206,7 @@ func TestGetTransactionStatus(t *testing.T) {
 				ctx:           ctx,
 				transactionID: transactionID,
 			},
-			mock: func(ml *mock_logger.MockLogger, mtr *mock_repo.MockTransactionRepo, mtp *mock_publisher.MockTransactionPublisher) {
+			mock: func(ml *mock_logger.MockLogger, mtr *mock_repo.MockTransactionRepo) {
 				ml.EXPECT().Debug("Get transaction status usecase", map[string]interface{}{
 					"transaction_id": transactionID,
 				})
@@ -221,7 +221,7 @@ func TestGetTransactionStatus(t *testing.T) {
 				ctx:           ctx,
 				transactionID: transactionID,
 			},
-			mock: func(ml *mock_logger.MockLogger, mtr *mock_repo.MockTransactionRepo, mtp *mock_publisher.MockTransactionPublisher) {
+			mock: func(ml *mock_logger.MockLogger, mtr *mock_repo.MockTransactionRepo) {
 				ml.EXPECT().Debug("Get transaction status usecase", map[string]interface{}{
 					"transaction_id": transactionID,
 				})
@@ -239,7 +239,7 @@ func TestGetTransactionStatus(t *testing.T) {
 			t.Parallel()
 
 			l, repo, publisher := transactionHelper(t)
-			testcase.mock(l, repo, publisher)
+			testcase.mock(l, repo)
 
 			transactionUsecase := usecase.NewTransactionUsecase(repo, publisher, l)
 
@@ -269,7 +269,7 @@ func TestCancelTransaction(t *testing.T) {
 	testcases := []struct {
 		name        string
 		args        args
-		mock        func(*mock_logger.MockLogger, *mock_repo.MockTransactionRepo, *mock_publisher.MockTransactionPublisher)
+		mock        func(*mock_logger.MockLogger, *mock_repo.MockTransactionRepo)
 		expectedErr error
 	}{
 		{
@@ -279,7 +279,7 @@ func TestCancelTransaction(t *testing.T) {
 				transactionID: transactionID,
 				reason:        reason,
 			},
-			mock: func(ml *mock_logger.MockLogger, mtr *mock_repo.MockTransactionRepo, mtp *mock_publisher.MockTransactionPublisher) {
+			mock: func(ml *mock_logger.MockLogger, mtr *mock_repo.MockTransactionRepo) {
 				ml.EXPECT().Debug("Cancel transaction usecase", map[string]interface{}{
 					"transaction_id": transactionID,
 					"reason":         reason,
@@ -295,7 +295,7 @@ func TestCancelTransaction(t *testing.T) {
 				transactionID: transactionID,
 				reason:        reason,
 			},
-			mock: func(ml *mock_logger.MockLogger, mtr *mock_repo.MockTransactionRepo, mtp *mock_publisher.MockTransactionPublisher) {
+			mock: func(ml *mock_logger.MockLogger, mtr *mock_repo.MockTransactionRepo) {
 				ml.EXPECT().Debug("Cancel transaction usecase", map[string]interface{}{
 					"transaction_id": transactionID,
 					"reason":         reason,
@@ -313,7 +313,7 @@ func TestCancelTransaction(t *testing.T) {
 			t.Parallel()
 
 			l, repo, publisher := transactionHelper(t)
-			testcase.mock(l, repo, publisher)
+			testcase.mock(l, repo)
 
 			transactionUsecase := usecase.NewTransactionUsecase(repo, publisher, l)
 
@@ -377,7 +377,7 @@ func TestAcceptTransaction(t *testing.T) {
 				transactionID: transactionID,
 				sender:        sender,
 			},
-			mock: func(ml *mock_logger.MockLogger, mtr *mock_repo.MockTransactionRepo, mtp *mock_publisher.MockTransactionPublisher) {
+			mock: func(ml *mock_logger.MockLogger, mtr *mock_repo.MockTransactionRepo, _ *mock_publisher.MockTransactionPublisher) {
 				ml.EXPECT().Debug("Accept transaction usecase", map[string]interface{}{
 					"transaction_id": transactionID,
 				})
@@ -392,7 +392,7 @@ func TestAcceptTransaction(t *testing.T) {
 				transactionID: transactionID,
 				sender:        sender,
 			},
-			mock: func(ml *mock_logger.MockLogger, mtr *mock_repo.MockTransactionRepo, mtp *mock_publisher.MockTransactionPublisher) {
+			mock: func(ml *mock_logger.MockLogger, mtr *mock_repo.MockTransactionRepo, _ *mock_publisher.MockTransactionPublisher) {
 				ml.EXPECT().Debug("Accept transaction usecase", map[string]interface{}{
 					"transaction_id": transactionID,
 				})
@@ -460,7 +460,7 @@ func TestUpdateTransaction(t *testing.T) {
 	testcases := []struct {
 		name        string
 		args        args
-		mock        func(*mock_logger.MockLogger, *mock_repo.MockTransactionRepo, *mock_publisher.MockTransactionPublisher)
+		mock        func(*mock_logger.MockLogger, *mock_repo.MockTransactionRepo)
 		expectedErr error
 	}{
 		{
@@ -469,7 +469,7 @@ func TestUpdateTransaction(t *testing.T) {
 				ctx:                ctx,
 				updatedTransaction: transaction,
 			},
-			mock: func(ml *mock_logger.MockLogger, mtr *mock_repo.MockTransactionRepo, mtp *mock_publisher.MockTransactionPublisher) {
+			mock: func(ml *mock_logger.MockLogger, mtr *mock_repo.MockTransactionRepo) {
 				ml.EXPECT().Debug("Update transaction usecase", map[string]interface{}{
 					"updated_transaction": transaction,
 				})
@@ -483,7 +483,7 @@ func TestUpdateTransaction(t *testing.T) {
 				ctx:                ctx,
 				updatedTransaction: transaction,
 			},
-			mock: func(ml *mock_logger.MockLogger, mtr *mock_repo.MockTransactionRepo, mtp *mock_publisher.MockTransactionPublisher) {
+			mock: func(ml *mock_logger.MockLogger, mtr *mock_repo.MockTransactionRepo) {
 				ml.EXPECT().Debug("Update transaction usecase", map[string]interface{}{
 					"updated_transaction": transaction,
 				})
@@ -500,7 +500,7 @@ func TestUpdateTransaction(t *testing.T) {
 			t.Parallel()
 
 			l, repo, publisher := transactionHelper(t)
-			testcase.mock(l, repo, publisher)
+			testcase.mock(l, repo)
 
 			transactionUsecase := usecase.NewTransactionUsecase(repo, publisher, l)
 
@@ -531,7 +531,7 @@ func TestChangeTransactionStatus(t *testing.T) {
 	testcases := []struct {
 		name        string
 		args        args
-		mock        func(*mock_logger.MockLogger, *mock_repo.MockTransactionRepo, *mock_publisher.MockTransactionPublisher)
+		mock        func(*mock_logger.MockLogger, *mock_repo.MockTransactionRepo)
 		expectedErr error
 	}{
 		{
@@ -541,7 +541,7 @@ func TestChangeTransactionStatus(t *testing.T) {
 				transactionID: transactionID,
 				status:        status,
 			},
-			mock: func(ml *mock_logger.MockLogger, mtr *mock_repo.MockTransactionRepo, mtp *mock_publisher.MockTransactionPublisher) {
+			mock: func(ml *mock_logger.MockLogger, mtr *mock_repo.MockTransactionRepo) {
 				ml.EXPECT().Debug("Change transaction status", map[string]interface{}{
 					"transaction_id": transactionID,
 				})
@@ -556,7 +556,7 @@ func TestChangeTransactionStatus(t *testing.T) {
 				transactionID: transactionID,
 				status:        status,
 			},
-			mock: func(ml *mock_logger.MockLogger, mtr *mock_repo.MockTransactionRepo, mtp *mock_publisher.MockTransactionPublisher) {
+			mock: func(ml *mock_logger.MockLogger, mtr *mock_repo.MockTransactionRepo) {
 				ml.EXPECT().Debug("Change transaction status", map[string]interface{}{
 					"transaction_id": transactionID,
 				})
@@ -573,7 +573,7 @@ func TestChangeTransactionStatus(t *testing.T) {
 			t.Parallel()
 
 			l, repo, publisher := transactionHelper(t)
-			testcase.mock(l, repo, publisher)
+			testcase.mock(l, repo)
 
 			transactionUsecase := usecase.NewTransactionUsecase(repo, publisher, l)
 

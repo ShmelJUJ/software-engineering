@@ -103,7 +103,7 @@ func getTransactionStatusQuery(transactionID string) sq.SelectBuilder {
 		})
 }
 
-func cancelTransactionQuery(transactionID string, reason string) sq.UpdateBuilder {
+func cancelTransactionQuery(transactionID, reason string) sq.UpdateBuilder {
 	return psql.
 		Update(transactionsTable).
 		Set("status", model.Canceled).
@@ -150,7 +150,7 @@ func updateTransactionQuery(transaction *model.Transaction) sq.UpdateBuilder {
 	return query
 }
 
-func acceptTransactionQuery(transactionID string, senderID string) sq.UpdateBuilder {
+func acceptTransactionQuery(transactionID, senderID string) sq.UpdateBuilder {
 	return psql.
 		Update(transactionsTable).
 		Set("status", model.Processed).

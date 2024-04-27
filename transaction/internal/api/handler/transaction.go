@@ -10,7 +10,7 @@ import (
 	"github.com/go-openapi/strfmt"
 )
 
-type transactionHandler struct {
+type TransactionHandler struct {
 	transactionUsecase usecase.TransactionUsecase
 	log                logger.Logger
 }
@@ -19,15 +19,15 @@ type transactionHandler struct {
 func NewTransactionHandler(
 	transactionUsecase usecase.TransactionUsecase,
 	log logger.Logger,
-) *transactionHandler {
-	return &transactionHandler{
+) *TransactionHandler {
+	return &TransactionHandler{
 		transactionUsecase: transactionUsecase,
 		log:                log,
 	}
 }
 
 // AcceptTransactionHandler handles the request to accept a transaction.
-func (th *transactionHandler) AcceptTransactionHandler(params apiTransaction.AcceptTransactionParams) middleware.Responder {
+func (th *TransactionHandler) AcceptTransactionHandler(params apiTransaction.AcceptTransactionParams) middleware.Responder {
 	th.log.Debug("Accept transaction handler", map[string]interface{}{
 		"transaction_id": params.ID.String(),
 		"body":           params.Body,
@@ -51,7 +51,7 @@ func (th *transactionHandler) AcceptTransactionHandler(params apiTransaction.Acc
 }
 
 // CancelTransactionHandler handles the request to cancel a transaction.
-func (th *transactionHandler) CancelTransactionHandler(params apiTransaction.CancelTransactionParams) middleware.Responder {
+func (th *TransactionHandler) CancelTransactionHandler(params apiTransaction.CancelTransactionParams) middleware.Responder {
 	th.log.Debug("Cancel transaction handler", map[string]interface{}{
 		"transaction_id": params.ID.String(),
 		"body":           params.Body,
@@ -73,7 +73,7 @@ func (th *transactionHandler) CancelTransactionHandler(params apiTransaction.Can
 }
 
 // CreateTransactionHandler handles the request to create a transaction.
-func (th *transactionHandler) CreateTransactionHandler(params apiTransaction.CreateTransactionParams) middleware.Responder {
+func (th *TransactionHandler) CreateTransactionHandler(params apiTransaction.CreateTransactionParams) middleware.Responder {
 	th.log.Debug("Create transaction handler", map[string]interface{}{
 		"body": params.Body,
 	})
@@ -98,7 +98,7 @@ func (th *transactionHandler) CreateTransactionHandler(params apiTransaction.Cre
 }
 
 // EditTransactionHandler handles the request to edit a transaction.
-func (th *transactionHandler) EditTransactionHandler(params apiTransaction.EditTransactionParams) middleware.Responder {
+func (th *TransactionHandler) EditTransactionHandler(params apiTransaction.EditTransactionParams) middleware.Responder {
 	th.log.Debug("Edit transaction handler", map[string]interface{}{
 		"transaction_id": params.ID.String(),
 		"body":           params.Body,
@@ -121,7 +121,7 @@ func (th *transactionHandler) EditTransactionHandler(params apiTransaction.EditT
 }
 
 // RetrieveTransactionHandler handles the request to retrieve a transaction.
-func (th *transactionHandler) RetrieveTransactionHandler(params apiTransaction.RetrieveTransactionParams) middleware.Responder {
+func (th *TransactionHandler) RetrieveTransactionHandler(params apiTransaction.RetrieveTransactionParams) middleware.Responder {
 	th.log.Debug("Retrieve transaction handler", map[string]interface{}{
 		"transaction_id": params.ID.String(),
 	})
@@ -143,7 +143,7 @@ func (th *transactionHandler) RetrieveTransactionHandler(params apiTransaction.R
 }
 
 // RetrieveTransactionStatusHandler handles the request to retrieve the status of a transaction.
-func (th *transactionHandler) RetrieveTransactionStatusHandler(params apiTransaction.RetrieveTransactionStatusParams) middleware.Responder {
+func (th *TransactionHandler) RetrieveTransactionStatusHandler(params apiTransaction.RetrieveTransactionStatusParams) middleware.Responder {
 	th.log.Debug("Retrieve transaction status handler", map[string]interface{}{
 		"transaction_id": params.ID.String(),
 	})
@@ -161,6 +161,7 @@ func (th *transactionHandler) RetrieveTransactionStatusHandler(params apiTransac
 	}
 
 	transactionStatusStr := transactionStatus.String()
+
 	return apiTransaction.NewRetrieveTransactionStatusOK().
 		WithPayload(&models.GetTransactionStatusResponse{
 			TransactionStatus: &transactionStatusStr,

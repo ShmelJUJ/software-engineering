@@ -7,7 +7,7 @@ import (
 	"time"
 
 	"github.com/ShmelJUJ/software-engineering/pkg/logger"
-	_ "github.com/lib/pq"
+	_ "github.com/lib/pq" //nolint // That is need for a correct migration
 	"github.com/pressly/goose"
 )
 
@@ -25,7 +25,7 @@ func init() {
 	}
 
 	databaseURL, ok := os.LookupEnv("PG_URL")
-	if !ok || len(databaseURL) == 0 {
+	if !ok || databaseURL == "" {
 		l.Fatal("migrate: environment variable not declared: PG_URL", map[string]interface{}{})
 	}
 
@@ -45,6 +45,7 @@ func init() {
 		})
 
 		time.Sleep(defaultTimeout)
+
 		attempts--
 	}
 
@@ -73,13 +74,4 @@ func init() {
 	}
 
 	l.Info("the migrations up attempt was successful", map[string]interface{}{})
-
-	// // Rollback
-	// if err := goose.Down(db, migrationsDir); err != nil {
-	// 	l.Fatal("failed to run migrations", map[string]interface{}{
-	// 		"error": err,
-	// 	})
-	// }
-
-	// l.Info("the migrations down attempt was successful", map[string]interface{}{})
 }

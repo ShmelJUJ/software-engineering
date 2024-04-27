@@ -44,8 +44,10 @@ func New(ctx context.Context, cfg *Config) (*Redis, error) {
 
 		log.Printf("Redis is trying to connect, attempts left: %d, err: %s\n", cfg.ConnAttempts, err)
 		time.Sleep(cfg.ConnTimeout)
+
 		cfg.ConnAttempts--
 	}
+
 	if err != nil {
 		return nil, fmt.Errorf("failed to connect to redis: %w", err)
 	}

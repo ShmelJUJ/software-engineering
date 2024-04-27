@@ -56,7 +56,7 @@ func (p *transactionPublisher) PublishSucceededTransaction(transaction *dto.Proc
 			payload,
 		),
 	); err != nil {
-		return NewPublishSucceededTransactionError("failed to publish succeded transaction", err)
+		return NewPublishSucceededTransactionError("failed to publish succeeded transaction", err)
 	}
 
 	return nil
