@@ -1,0 +1,27 @@
+package config
+
+import (
+	"github.com/pkg/errors"
+	"github.com/ilyakaznacheev/cleanenv"
+)
+
+// App config.
+type httpConfig struct {
+	Port int `yaml:"port"`
+}
+
+// Config struct
+type Config struct {
+    HTTPCfg *httpConfig `yaml:"http"`
+}
+
+// NewConfig initializes a new Config instance by reading from a YAML file.
+func NewConfig() (*Config, error) {
+	cfg := &Config{}
+
+	if err := cleanenv.ReadConfig("./config/config.yml", cfg); err != nil {
+		return nil, fmt.Errorf("failed to read config: %w", err)
+	}
+
+	return cfg, nil
+}

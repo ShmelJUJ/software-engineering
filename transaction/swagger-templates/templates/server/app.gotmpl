@@ -1,0 +1,60 @@
+package app
+
+{{ $name := .Name }}
+{{ $operations := .Operations }}
+import (
+	"fmt"
+
+	"github.com/ShmelJUJ/software-engineering/{{ dasherize .Name }}/internal/generated/restapi"
+	"github.com/ShmelJUJ/software-engineering/{{ dasherize .Name }}/internal/generated/restapi/operations"
+	{{range $index, $op := .Operations}}
+        {{ $found := false }}
+        {{ range $i, $sop := $operations }}
+            {{ if and (gt $i $index ) (eq $op.Package $sop.Package)}}
+                {{ $found = true }}
+            {{end}}
+        {{end}}
+        {{ if not $found }}
+        api{{ pascalize $op.Package }} "{{$op.GenCommon.TargetImportPath}}/{{ $op.RootPackage }}/operations/{{ $op.Package }}"
+        {{end}}
+    {{end}}
+
+	"github.com/go-openapi/loads"
+
+    "github.com/ShmelJUJ/software-engineering/pkg/logger"
+    "github.com/ShmelJUJ/software-engineering/{{ dasherize .Name }}/config"
+	"github.com/ShmelJUJ/software-engineering/{{ dasherize .Name }}/internal/app"
+    "github.com/ShmelJUJ/software-engineering/{{ dasherize .Name }}/internal/api/handler"
+)
+
+func Run(cfg *config.Config) {
+    l, err := logger.NewLogrusLogger("info")
+    if err != nil {
+        log.Fatalln("failed to create new logger: ", err)
+    }
+
+	swaggerSpec, err := loads.Analyzed({{ .APIPackage }}.SwaggerJSON, "")
+	if err != nil {
+        l.Fatal("failed to get swagger spec", map[string]interface{}{
+            "error": err,
+        })
+	}
+
+    transactionHandler := handler.NewTransactionHandler()
+
+	api := operations.New{{ pascalize .Name }}API(swaggerSpec)
+    {{range .Operations}}
+    api.{{ pascalize .Package }}{{ pascalize .Name }}Handler = api{{ pascalize .Package }}.{{ pascalize .Name }}HandlerFunc(transactionHandler.{{ pascalize .Name }}Handler)
+    {{- end}}
+	server := {{ .APIPackage }}.NewServer(api)
+	defer server.Shutdown()
+
+	server.ConfigureAPI()
+
+    server.Port = cfg.HTTPCfg.Port
+    if err := server.Serve(); err != nil {
+        l.Fatal("failed to serve server", map[string]interface{}{
+            "error": err,
+        })
+    }
+}

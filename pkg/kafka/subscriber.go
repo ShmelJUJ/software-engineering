@@ -2,8 +2,10 @@ package kafka
 
 import (
 	"fmt"
+	"time"
 
 	"github.com/IBM/sarama"
+	"github.com/ShmelJUJ/software-engineering/pkg/logger"
 	"github.com/ThreeDotsLabs/watermill"
 	"github.com/ThreeDotsLabs/watermill-kafka/v3/pkg/kafka"
 	"github.com/ThreeDotsLabs/watermill/message"
@@ -79,7 +81,30 @@ func NewSubscriber(brokers []string, opts ...SubscriberOption) (message.Subscrib
 		}
 	}
 
-	subscriber, err := kafka.NewSubscriber(subscriberConfig, defaultLogger)
+	connAttempts := defaultConnAttemts
+	connTimeout := defaultConnTimeout
+
+	log, err := logger.NewLogrusLogger("info")
+	if err != nil {
+		return nil, fmt.Errorf("failed to create new logger: %w", err)
+	}
+
+	var subscriber message.Subscriber
+
+	for connAttempts > 0 {
+		subscriber, err = kafka.NewSubscriber(subscriberConfig, defaultLogger)
+		if err == nil {
+			break
+		}
+
+		log.Info("Subscriber is trying to connect...", map[string]interface{}{
+			"attempts_left": connAttempts,
+		})
+
+		time.Sleep(connTimeout)
+
+		connAttempts--
+	}
 	if err != nil {
 		return nil, fmt.Errorf("failed to create a new subscriber: %w", err)
 	}

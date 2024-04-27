@@ -1,6 +1,6 @@
 CURDIR=$(shell pwd)
 BINDIR=${CURDIR}/bin
-GOVER=$(shell go version | perl -nle '/(go\d\S+)/; print $$1;')
+GOVER=$(shell go version | perl -nle '/(go\d+\.\d+)/; print $$1;')
 
 SMARTIMPORTSVER=v0.2.0
 SMARTIMPORTSBIN=${BINDIR}/smartimports_${GOVER}
@@ -21,6 +21,13 @@ bindir:
 precommit: format lint
 	echo "OK"
 .PHONY: precommit
+
+gen-transaction-service:
+	swagger generate server \
+		-f ./doc/transaction_swagger.yml \
+        -t ./transaction/internal/generated -C ./transaction/swagger-templates/server.yml \
+        --template-dir ./transaction/swagger-templates/templates \
+        --name transaction
 
 # ==============================================================================
 # Tools commands
