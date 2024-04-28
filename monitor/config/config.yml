@@ -1,0 +1,17 @@
+logger:
+  level: debug
+
+http:
+  port: 8080
+
+subscriber:
+  brokers:
+    - kafka:29091
+  topic_details:
+    num_partitions: 1
+    replication_factor: 1
+  process_topic: monitor.process
+
+publisher:
+  brokers:
+    - kafka:29091

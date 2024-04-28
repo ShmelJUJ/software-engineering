@@ -1,0 +1,88 @@
+swagger: '2.0'
+info:
+  version: v1
+  title: Monitor Service
+  license:
+    name: MIT
+    url: https://opensource.org/license/mit
+host: localhost:8080
+basePath: /api/v1
+tags:
+  - name: monitor
+    description: Methods for monitor management.
+schemes:
+  - http
+paths:
+  /monitor/process:
+    post:
+      tags:
+        - monitor
+      summary: The method is used to process request.
+      operationId: process
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - in: body
+          name: body
+          description: Information required to process a request.
+          required: true
+          schema:
+            $ref: '#/definitions/ProcessRequest'
+      responses:
+        '200':
+          description: Request successfully processed.
+          schema:
+            $ref: '#/definitions/ProcessResponse'
+        '400':
+          description: Validation error.
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        '403':
+          description: Forbidden error.
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        '500':
+          description: Internal server error.
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+      # security:
+      #   - qr_payment_auth:
+      #       - write:requests
+      #       - read:requests
+# securityDefinitions:
+#   qr_payment_auth:
+#     type: oauth2
+#     flow: accessCode
+#     authorizationUrl: 'https://accounts.google.com/o/oauth2/v2/auth'
+#     tokenUrl: 'https://www.googleapis.com/oauth2/v4/token'
+#     scopes:
+#       read:requests: Read your transaction.
+#       write:requests: Modify your transactions.
+definitions:
+  ErrorResponse:
+    type: object
+    properties:
+      code:
+        type: integer
+        format: int32
+      message:
+        type: string
+  ProcessRequest:
+    type: object
+    required:
+      - from
+      - to
+      - method
+    properties:
+      from:
+        type: string
+      to:
+        type: string
+      method:
+        type: string
+      payload:
+        type: object
+  ProcessResponse:
+    type: object
