@@ -29,6 +29,7 @@ type httpConfig struct {
 	Port int `yaml:"port"`
 }
 
+// Config represents the overall configuration structure.
 type Config struct {
 	LoggerCfg     *loggerConfig     `yaml:"logger"`
 	PublisherCfg  *publisherConfig  `yaml:"publisher"`

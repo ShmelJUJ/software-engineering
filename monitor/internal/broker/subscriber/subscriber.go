@@ -21,6 +21,7 @@ const (
 	toFailedTransactionTopic    = "transaction.failed"
 )
 
+// MonitorSubscriber represents a subscriber for monitoring.
 type MonitorSubscriber struct {
 	cfg        *Config
 	log        logger.Logger
@@ -29,6 +30,7 @@ type MonitorSubscriber struct {
 	monitorPub publisher.MonitorPublisher
 }
 
+// NewMonitorSubscriber creates a new MonitorSubscriber instance.
 func NewMonitorSubscriber(
 	cfg *Config,
 	log logger.Logger,
@@ -50,6 +52,7 @@ func NewMonitorSubscriber(
 	}, nil
 }
 
+// RegisterProcessHandler registers the process handler for the monitor subscriber.
 func (s *MonitorSubscriber) RegisterProcessHandler() {
 	s.log.Debug("Register process handler", map[string]interface{}{})
 

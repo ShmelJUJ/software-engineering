@@ -16,6 +16,7 @@ const (
 	getUserMethod = "getUserData"
 )
 
+// MonitorHandler handles incoming requests for monitoring.
 type MonitorHandler struct {
 	log logger.Logger
 }
@@ -27,6 +28,7 @@ func NewMonitorHandler(log logger.Logger) *MonitorHandler {
 	}
 }
 
+// ProcessHandler processes incoming requests and returns a middleware.Responder.
 func (mh *MonitorHandler) ProcessHandler(params apiMonitor.ProcessParams) middleware.Responder {
 	from := *params.Body.From
 	to := *params.Body.To
