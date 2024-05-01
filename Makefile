@@ -48,7 +48,7 @@ install-mockgen: bindir
 .PHONY: install-mockgen
 
 gen-mocks: install-mockgen
-	go generate ./...
+	go generate -run mockgen ./...
 .PHONY: gen-mocks
 
 install-lint: bindir

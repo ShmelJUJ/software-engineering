@@ -14,7 +14,7 @@ import (
 	"github.com/ShmelJUJ/software-engineering/monitor/internal/generated/restapi/operations/monitor"
 )
 
-////go:generate swagger generate server --target ../../generated --name Monitor --spec ../../../../doc/monitor_swagger.yml --template-dir ./monitor/swagger-templates/templates --principal interface{}
+//go:generate swagger generate server --target ../../generated --name Monitor --spec ../../../../doc/monitor_swagger.yml --template-dir ./monitor/swagger-templates/templates --principal interface{}
 
 func configureFlags(api *operations.MonitorAPI) {
 	// api.CommandLineOptionsGroups = []swag.CommandLineOptionsGroup{ ... }
