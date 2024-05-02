@@ -1,0 +1,130 @@
+openapi: 3.0.0
+info:
+  description: "Сервис для хранения информации о клиентах"
+  title: User
+  version: "1.0"
+
+tags:
+  - name: client
+    description: Everything about your clients
+
+paths:
+  '/user/internal/v1/clients/{client_id}':
+    get:
+      tags:
+        - client
+      operationId: GetClientById
+      parameters:
+        - description: Идентификатор
+          in: path
+          name: client_id
+          schema:
+            type: string
+            format: uuid
+          required: true
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  '/user/internal/v1/clients/{client_id}/wallets/{wallet_id}':
+   get:
+      tags:
+        - client
+      operationId: GetWalletById
+      parameters:
+        - description: Идентификатор пользователя
+          in: path
+          name: client_id
+          schema:
+            type: string
+            format: uuid
+          required: true
+        - description: Идентификатор кошелька
+          in: path
+          name: wallet_id
+          schema:
+            type: string
+            format: uuid
+          required: true
+
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Wallet'
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+components:
+  schemas:
+    User:
+      type: object
+      properties:
+        client_id:
+          type: string
+          format: uuid
+        first_name:
+          type: string
+        last_name:
+          type: string
+        email:
+          type: string
+          format: email
+        wallets:
+          type: array
+          nullable: false
+          items:
+            type: string
+      required:
+        - email
+        - client_id
+
+    Wallet:
+      type: object
+      properties:
+        public_key:
+          type: string
+        private_key:
+          type: string
+      required:
+        - public_key
+        - private_key
+
+    Error:
+      type: object
+      properties:
+        message:
+          description: human-redable error message
+          type: string
+        code:
+          description: machine-redable error message
+          type: string
+      required:
+        - message
+        - code
+
+
