@@ -22,6 +22,7 @@ import (
 	"github.com/ShmelJUJ/software-engineering/monitor/internal/api/handler"
 	"github.com/ShmelJUJ/software-engineering/pkg/kafka"
 	"github.com/ShmelJUJ/software-engineering/pkg/logger"
+	gen "github.com/ShmelJUJ/software-engineering/user/gen"
 )
 
 const (
@@ -61,7 +62,14 @@ func Run(cfg *config.Config) {
 		})
 	}
 
-	monitorHandler := handler.NewMonitorHandler(l)
+	userClient, err := gen.NewClient(cfg.UserClientCfg.URL)
+	if err != nil {
+		l.Fatal("failed to make new user client", map[string]interface{}{
+			"error": err,
+		})
+	}
+
+	monitorHandler := handler.NewMonitorHandler(l, userClient)
 
 	api := operations.NewMonitorAPI(swaggerSpec)
 

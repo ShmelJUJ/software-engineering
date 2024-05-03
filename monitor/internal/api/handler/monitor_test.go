@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"context"
 	"fmt"
 	"testing"
 
@@ -8,30 +9,34 @@ import (
 	apiMonitor "github.com/ShmelJUJ/software-engineering/monitor/internal/generated/restapi/operations/monitor"
 	"github.com/ShmelJUJ/software-engineering/pkg/logger"
 	mock_logger "github.com/ShmelJUJ/software-engineering/pkg/logger/mocks"
+	gen "github.com/ShmelJUJ/software-engineering/user/gen"
+	mock_user_client "github.com/ShmelJUJ/software-engineering/user/mocks"
 	"github.com/go-openapi/runtime/middleware"
 	"github.com/stretchr/testify/assert"
 	"go.uber.org/mock/gomock"
 )
 
-func monitorHandlerHelper(t *testing.T) *mock_logger.MockLogger {
+func monitorHandlerHelper(t *testing.T) (*mock_logger.MockLogger, *mock_user_client.MockHandler) {
 	t.Helper()
 
 	mockCtrl := gomock.NewController(t)
 	defer mockCtrl.Finish()
 
 	log := mock_logger.NewMockLogger(mockCtrl)
+	userClient := mock_user_client.NewMockHandler(mockCtrl)
 
-	return log
+	return log, userClient
 }
 
 func TestNewMonitorHandler(t *testing.T) {
 	t.Parallel()
 
 	type args struct {
-		log logger.Logger
+		log        logger.Logger
+		userClient gen.Handler
 	}
 
-	log := monitorHandlerHelper(t)
+	log, userClient := monitorHandlerHelper(t)
 
 	testcases := []struct {
 		name                   string
@@ -41,10 +46,12 @@ func TestNewMonitorHandler(t *testing.T) {
 		{
 			name: "Successfully create new monitor handler",
 			args: args{
-				log: log,
+				log:        log,
+				userClient: userClient,
 			},
 			expectedMonitorHandler: &MonitorHandler{
-				log: log,
+				log:        log,
+				userClient: userClient,
 			},
 		},
 	}
@@ -57,6 +64,7 @@ func TestNewMonitorHandler(t *testing.T) {
 
 			actualMonitorHandler := NewMonitorHandler(
 				testcase.args.log,
+				testcase.args.userClient,
 			)
 
 			assert.Equal(t, testcase.expectedMonitorHandler, actualMonitorHandler)
@@ -74,13 +82,15 @@ func TestProcessHandler(t *testing.T) {
 	testPaymentGatewayService := paymentGatewayService
 	testUserService := userService
 	testGetUserMethod := getUserMethod
-	testPayload := "test-payload"
+	testPayload := gen.GetClientByIdParams{}
 	testUnknownService := "test-service"
+	ctx := context.Background()
+	res := &gen.User{}
 
 	testcases := []struct {
 		name             string
 		args             args
-		mock             func(*mock_logger.MockLogger)
+		mock             func(*mock_logger.MockLogger, *mock_user_client.MockHandler)
 		expectedResponse middleware.Responder
 	}{
 		{
@@ -95,15 +105,17 @@ func TestProcessHandler(t *testing.T) {
 					},
 				},
 			},
-			mock: func(ml *mock_logger.MockLogger) {
+			mock: func(ml *mock_logger.MockLogger, mh *mock_user_client.MockHandler) {
 				ml.EXPECT().Debug("Process handler", map[string]interface{}{
 					"from":    testPaymentGatewayService,
 					"to":      testUserService,
 					"method":  testGetUserMethod,
 					"payload": testPayload,
 				})
+				mh.EXPECT().GetClientById(ctx, testPayload).Return(res, nil).Times(1)
 			},
-			expectedResponse: apiMonitor.NewProcessOK(),
+			expectedResponse: apiMonitor.NewProcessOK().
+				WithPayload(res),
 		},
 		{
 			name: "Failed to verify process request",
@@ -117,7 +129,7 @@ func TestProcessHandler(t *testing.T) {
 					},
 				},
 			},
-			mock: func(ml *mock_logger.MockLogger) {
+			mock: func(ml *mock_logger.MockLogger, mh *mock_user_client.MockHandler) {
 				ml.EXPECT().Debug("Process handler", map[string]interface{}{
 					"from":    testUnknownService,
 					"to":      testUserService,
@@ -139,15 +151,20 @@ func TestProcessHandler(t *testing.T) {
 		t.Run(testcase.name, func(t *testing.T) {
 			t.Parallel()
 
-			log := monitorHandlerHelper(t)
+			log, userClient := monitorHandlerHelper(t)
 
-			testcase.mock(log)
+			testcase.mock(log, userClient)
 
 			actualMonitorHandler := NewMonitorHandler(
 				log,
+				userClient,
 			)
 
 			actualResponse := actualMonitorHandler.ProcessHandler(testcase.args.params)
+
+			if bad, ok := actualResponse.(*apiMonitor.ProcessBadRequest); ok {
+				fmt.Println(bad.Payload)
+			}
 
 			assert.Equal(t, testcase.expectedResponse, actualResponse)
 		})
@@ -170,7 +187,7 @@ func TestVerify(t *testing.T) {
 		expectedVal bool
 	}{
 		{
-			name: "Successful verify from payment gateway to user service with getUser method",
+			name: "Successful verify from payment gateway to user service with getClient method",
 			args: args{
 				from:   paymentGatewayService,
 				to:     userService,
@@ -179,7 +196,16 @@ func TestVerify(t *testing.T) {
 			expectedVal: true,
 		},
 		{
-			name: "failed to verify from unknownService to user service with getUser method",
+			name: "Successful verify from payment gateway to user service with getWallet method",
+			args: args{
+				from:   paymentGatewayService,
+				to:     userService,
+				method: getWalletMethod,
+			},
+			expectedVal: true,
+		},
+		{
+			name: "failed to verify from unknownService to user service with getClient method",
 			args: args{
 				from:   unknownService,
 				to:     userService,
@@ -221,31 +247,65 @@ func TestProcessRequest(t *testing.T) {
 		params apiMonitor.ProcessParams
 	}
 
-	testPaymentGatewayService := paymentGatewayService
-	testUserService := userService
-	testGetUserMethod := getUserMethod
-	testPayload := "test-payload"
-	testUnknownService := "test-service"
-	testUnknownMethod := "test-method"
+	var (
+		ctx = context.Background()
+
+		testPaymentGatewayService = paymentGatewayService
+		testUserService           = userService
+
+		testUnknownService = "test-service"
+		testUnknownMethod  = "test-method"
+
+		testGetUserMethod = getUserMethod
+		testClientPayload = gen.GetClientByIdParams{}
+		testClientRes     = &gen.User{}
+
+		testGetWalletMethod = getWalletMethod
+		testWalletPayload   = gen.GetWalletByIdParams{}
+		testWalletRes       = &gen.Wallet{}
+	)
 
 	testcases := []struct {
 		name             string
 		args             args
+		mock             func(*mock_user_client.MockHandler)
 		expectedResponse middleware.Responder
 	}{
 		{
-			name: "Successfully process request",
+			name: "Successfully process request getClientByID",
 			args: args{
 				params: apiMonitor.ProcessParams{
 					Body: &models.ProcessRequest{
 						From:    &testPaymentGatewayService,
 						To:      &testUserService,
 						Method:  &testGetUserMethod,
-						Payload: testPayload,
+						Payload: testClientPayload,
 					},
 				},
 			},
-			expectedResponse: apiMonitor.NewProcessOK(),
+			mock: func(mh *mock_user_client.MockHandler) {
+				mh.EXPECT().GetClientById(ctx, testClientPayload).Return(testClientRes, nil).Times(1)
+			},
+			expectedResponse: apiMonitor.NewProcessOK().
+				WithPayload(testClientRes),
+		},
+		{
+			name: "Successfully process request getWalletByID",
+			args: args{
+				params: apiMonitor.ProcessParams{
+					Body: &models.ProcessRequest{
+						From:    &testPaymentGatewayService,
+						To:      &testUserService,
+						Method:  &testGetWalletMethod,
+						Payload: testWalletPayload,
+					},
+				},
+			},
+			mock: func(mh *mock_user_client.MockHandler) {
+				mh.EXPECT().GetWalletById(ctx, testWalletPayload).Return(testWalletRes, nil).Times(1)
+			},
+			expectedResponse: apiMonitor.NewProcessOK().
+				WithPayload(testWalletRes),
 		},
 		{
 			name: "Failed to process request with unknown destination service",
@@ -255,10 +315,11 @@ func TestProcessRequest(t *testing.T) {
 						From:    &testPaymentGatewayService,
 						To:      &testUnknownService,
 						Method:  &testGetUserMethod,
-						Payload: testPayload,
+						Payload: testClientPayload,
 					},
 				},
 			},
+			mock: func(_ *mock_user_client.MockHandler) {},
 			expectedResponse: apiMonitor.NewProcessBadRequest().WithPayload(
 				&models.ErrorResponse{
 					Code:    int32(apiMonitor.ProcessBadRequestCode),
@@ -274,10 +335,11 @@ func TestProcessRequest(t *testing.T) {
 						From:    &testPaymentGatewayService,
 						To:      &testUserService,
 						Method:  &testUnknownMethod,
-						Payload: testPayload,
+						Payload: testClientPayload,
 					},
 				},
 			},
+			mock: func(_ *mock_user_client.MockHandler) {},
 			expectedResponse: apiMonitor.NewProcessBadRequest().WithPayload(
 				&models.ErrorResponse{
 					Code:    int32(apiMonitor.ProcessBadRequestCode),
@@ -293,7 +355,16 @@ func TestProcessRequest(t *testing.T) {
 		t.Run(testcase.name, func(t *testing.T) {
 			t.Parallel()
 
-			actualResponse := processRequest(testcase.args.params)
+			log, userClient := monitorHandlerHelper(t)
+
+			testcase.mock(userClient)
+
+			monitorHandler := NewMonitorHandler(
+				log,
+				userClient,
+			)
+
+			actualResponse := monitorHandler.processRequest(testcase.args.params)
 
 			assert.Equal(t, testcase.expectedResponse, actualResponse)
 		})

@@ -15,3 +15,6 @@ subscriber:
 publisher:
   brokers:
     - kafka:29091
+
+user_client:
+  url: http://localhost:8081/

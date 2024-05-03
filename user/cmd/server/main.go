@@ -12,9 +12,9 @@ import (
 	"go.uber.org/zap"
 	"golang.org/x/sync/errgroup"
 
-	"user/internal/api"
-	gen "user/internal/gen"
-	"user/internal/httpmiddleware"
+	"github.com/ShmelJUJ/software-engineering/user/internal/api"
+	gen "github.com/ShmelJUJ/software-engineering/user/gen"
+	"github.com/ShmelJUJ/software-engineering/user/internal/httpmiddleware"
 )
 
 const shutdownTimeout = 15 * time.Second

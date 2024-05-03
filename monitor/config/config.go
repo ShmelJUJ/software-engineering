@@ -29,12 +29,17 @@ type httpConfig struct {
 	Port int `yaml:"port"`
 }
 
+type userClientConfig struct {
+	URL string `yaml:"url"`
+}
+
 // Config represents the overall configuration structure.
 type Config struct {
 	LoggerCfg     *loggerConfig     `yaml:"logger"`
 	PublisherCfg  *publisherConfig  `yaml:"publisher"`
 	SubscriberCfg *subscriberConfig `yaml:"subscriber"`
 	HTTPCfg       *httpConfig       `yaml:"http"`
+	UserClientCfg *userClientConfig `yaml:"user_client"`
 }
 
 // NewConfig initializes a new Config instance by reading from a YAML file.

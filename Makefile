@@ -37,6 +37,10 @@ gen-monitor-client:
 		-A MonitorAPI
 .PHONY: gen-monitor-client
 
+gen-user:
+	go generate -run github.com/ogen-go/ogen/cmd/ogen@latest ./...
+.PHONY: gen-user
+
 # ==============================================================================
 # Tools commands
 

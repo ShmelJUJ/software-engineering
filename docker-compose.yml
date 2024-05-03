@@ -13,6 +13,35 @@ services:
       kafka:
         condition: service_started
 
+  user:
+    build:
+      context: .
+      dockerfile: ./user/Dockerfile
+    container_name: user
+    image: user
+    ports:
+      - 8081:8080
+    depends_on:
+      user_postgres:
+        condition: service_healthy
+
+  user_postgres:
+    container_name: user_pg_db
+    ports:
+      - 5432:5432
+    environment:
+      - POSTGRES_PASSWORD=root
+      - POSTGRES_USER=postgres
+      - POSTGRES_DB=postgres
+    volumes:
+      - user-pg-data:/var/lib/postgresql/data
+    image: postgres:15-alpine
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 1s
+      timeout: 1s
+      retries: 10
+
   zookeeper:
     image: confluentinc/cp-zookeeper:7.6.0
     restart: always
@@ -58,7 +87,7 @@ services:
     image: provectuslabs/kafka-ui:latest
     container_name: kafka-ui
     ports:
-      - "8081:8080"
+      - "8082:8080"
     restart: always
     environment:
       - KAFKA_CLUSTERS_0_NAME=local
@@ -66,3 +95,7 @@ services:
       - DYNAMIC_CONFIG_ENABLED=true
     depends_on:
       - kafka
+
+volumes:
+  user-pg-data:
+    name: user-pg-data
