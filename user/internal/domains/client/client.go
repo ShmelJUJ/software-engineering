@@ -19,7 +19,8 @@ type Client struct {
 func NewClient(client_id uuid.UUID,
 	client_first_name string,
 	client_last_name string,
-	email string, wallets []wallet) (client Client) {
+	email string, wallets []wallet,
+) (client Client) {
 	client.client_id = client_id
 	client.client_first_name = client_first_name
 	client.client_last_name = client_last_name
@@ -63,6 +64,7 @@ func (wal *wallet) GetPublicKey() string {
 func (wal *wallet) GetWalletId() uuid.UUID {
 	return wal.wallet_id
 }
+
 func (wal *wallet) GetPrivateKey() string {
 	return wal.private_key
 }

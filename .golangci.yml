@@ -441,3 +441,4 @@ issues:
 
   exclude-dirs:
     - monitor/internal/generated
+    - user

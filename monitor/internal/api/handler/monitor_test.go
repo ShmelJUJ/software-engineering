@@ -129,7 +129,7 @@ func TestProcessHandler(t *testing.T) {
 					},
 				},
 			},
-			mock: func(ml *mock_logger.MockLogger, mh *mock_user_client.MockHandler) {
+			mock: func(ml *mock_logger.MockLogger, _ *mock_user_client.MockHandler) {
 				ml.EXPECT().Debug("Process handler", map[string]interface{}{
 					"from":    testUnknownService,
 					"to":      testUserService,

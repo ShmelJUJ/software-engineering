@@ -12,8 +12,9 @@ import (
 	"go.uber.org/zap"
 	"golang.org/x/sync/errgroup"
 
-	"github.com/ShmelJUJ/software-engineering/user/internal/api"
 	gen "github.com/ShmelJUJ/software-engineering/user/gen"
+	gen "github.com/ShmelJUJ/software-engineering/user/gen"
+	"github.com/ShmelJUJ/software-engineering/user/internal/api"
 	"github.com/ShmelJUJ/software-engineering/user/internal/httpmiddleware"
 )
 
