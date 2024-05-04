@@ -13,7 +13,6 @@ import (
 	"golang.org/x/sync/errgroup"
 
 	gen "github.com/ShmelJUJ/software-engineering/user/gen"
-	gen "github.com/ShmelJUJ/software-engineering/user/gen"
 	"github.com/ShmelJUJ/software-engineering/user/internal/api"
 	"github.com/ShmelJUJ/software-engineering/user/internal/httpmiddleware"
 )
