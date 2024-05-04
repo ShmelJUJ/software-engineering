@@ -1,6 +1,6 @@
 CURDIR=$(shell pwd)
 BINDIR=${CURDIR}/bin
-GOVER=$(shell go version | perl -nle '/(go\d\S+)/; print $$1;')
+GOVER=$(shell go version | perl -nle '/(go\d+\.\d+)/; print $$1;')
 
 SMARTIMPORTSVER=v0.2.0
 SMARTIMPORTSBIN=${BINDIR}/smartimports_${GOVER}
@@ -22,6 +22,25 @@ precommit: format lint
 	echo "OK"
 .PHONY: precommit
 
+gen-monitor-service:
+	swagger generate server \
+		-f ./doc/monitor_swagger.yml \
+        -t ./monitor/internal/generated -C ./monitor/swagger-templates/server.yml \
+        --template-dir ./monitor/swagger-templates/templates \
+        --name monitor
+.PHONY: gen-monitor-service
+
+gen-monitor-client:
+	swagger generate client \
+		-f ./doc/monitor_swagger.yml \
+		-t ./pkg/monitor_client \
+		-A MonitorAPI
+.PHONY: gen-monitor-client
+
+gen-user:
+	go generate -run github.com/ogen-go/ogen/cmd/ogen@latest ./...
+.PHONY: gen-user
+
 # ==============================================================================
 # Tools commands
 
@@ -33,7 +52,7 @@ install-mockgen: bindir
 .PHONY: install-mockgen
 
 gen-mocks: install-mockgen
-	go generate ./...
+	go generate -run mockgen ./...
 .PHONY: gen-mocks
 
 install-lint: bindir

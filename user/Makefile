@@ -1,3 +1,0 @@
-gen-user:
-	go generate ./...
-.PHONY: generate

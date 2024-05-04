@@ -438,3 +438,7 @@ issues:
   # Even with a recent GPT-4 release I still believe that
   # I know better how to do my job and fix the suggestions.
   fix: false
+
+  exclude-dirs:
+    - monitor/internal/generated
+    - user
