@@ -43,6 +43,7 @@ gen-monitor-client:
 		-f ./doc/monitor_swagger.yml \
 		-t ./pkg/monitor_client \
 		-A MonitorAPI
+	${MOCKGENBIN} -package mocks -destination pkg/monitor_client/mocks/monitor_client_mocks.go github.com/ShmelJUJ/software-engineering/pkg/monitor_client/client/monitor ClientService
 .PHONY: gen-monitor-client
 
 gen-user:

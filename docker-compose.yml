@@ -1,6 +1,16 @@
 version: '3.5'
 
 services:
+  payment_gateway:
+    build:
+      context: .
+      dockerfile: ./payment_gateway/Dockerfile
+    container_name: payment_gateway
+    restart: always
+    image: payment_gateway
+    depends_on: 
+      - kafka
+
   transaction:
     build:
       context: .
@@ -151,5 +161,6 @@ volumes:
 
   transaction-redis-data:
     name: transaction-redis-data
+
   user-pg-data:
     name: user-pg-data
