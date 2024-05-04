@@ -30,7 +30,7 @@ func init() {
     },
     "version": "v1"
   },
-  "host": "localhost:8080",
+  "host": "localhost:8083",
   "basePath": "/api/v1",
   "paths": {
     "/transaction/create": {
@@ -595,7 +595,7 @@ func init() {
     },
     "version": "v1"
   },
-  "host": "localhost:8080",
+  "host": "localhost:8083",
   "basePath": "/api/v1",
   "paths": {
     "/transaction/create": {

@@ -437,6 +437,8 @@ issues:
 
   exclude-dirs:
     - transaction/internal/generated
+    - user
+    - monitor/internal/generated
 
   exclude-files:
     - transaction/internal/app/migrate.go

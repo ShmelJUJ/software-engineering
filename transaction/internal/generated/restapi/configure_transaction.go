@@ -14,7 +14,7 @@ import (
 	"github.com/ShmelJUJ/software-engineering/transaction/internal/generated/restapi/operations/transaction"
 )
 
-////go:generate swagger generate server --target ../../generated --name Transaction --spec ../../../../doc/transaction_swagger.yml --template-dir ./transaction/swagger-templates/templates --principal interface{}
+//go:generate swagger generate server --target ../../generated --name Transaction --spec ../../../../doc/transaction_swagger.yml --template-dir ./transaction/swagger-templates/templates --principal interface{}
 
 func configureFlags(api *operations.TransactionAPI) {
 	// api.CommandLineOptionsGroups = []swag.CommandLineOptionsGroup{ ... }

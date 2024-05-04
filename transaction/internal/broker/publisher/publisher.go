@@ -9,9 +9,14 @@ import (
 
 //go:generate mockgen -package mocks -destination mocks/transaction_publisher_mocks.go github.com/ShmelJUJ/software-engineering/transaction/internal/broker/publisher TransactionPublisher
 
-// TransactionPublisher is an interface for publishing succeeded transactions.
+const (
+	transactionService    = "transaction"
+	paymentGatewayService = "payment_gateway"
+)
+
+// TransactionPublisher is an interface for publishing processed transactions.
 type TransactionPublisher interface {
-	PublishSucceededTransaction(transaction *dto.ProcessedTransaction) error
+	PublishProcessedTransaction(transaction *dto.ProcessedTransaction) error
 }
 
 type transactionPublisher struct {
@@ -38,25 +43,31 @@ func NewTransactionPublisher(
 	}, nil
 }
 
-// PublishSucceededTransaction publishes a succeeded transaction.
-func (p *transactionPublisher) PublishSucceededTransaction(transaction *dto.ProcessedTransaction) error {
-	p.log.Debug("Start publish succeeded transaction", map[string]interface{}{
+// PublishProcessedTransaction publishes a processed transaction.
+func (p *transactionPublisher) PublishProcessedTransaction(transaction *dto.ProcessedTransaction) error {
+	p.log.Debug("Start publish processed transaction", map[string]interface{}{
 		"transaction": transaction,
 	})
 
-	payload, err := transaction.Encode()
+	monitorDTO := &dto.Process{
+		From:    transactionService,
+		ToTopic: p.cfg.ProcessedTransactionTopic,
+		Payload: transaction,
+	}
+
+	payload, err := monitorDTO.Encode()
 	if err != nil {
-		return NewPublishSucceededTransactionError("failed to encode succeeded transaction", err)
+		return NewPublishProcessedTransactionError("failed to encode monitor process dto", err)
 	}
 
 	if err = p.pub.Publish(
-		p.cfg.ProcessedTransactionTopic,
+		p.cfg.ProcessMonitorTopic,
 		message.NewMessage(
 			watermill.NewUUID(),
 			payload,
 		),
 	); err != nil {
-		return NewPublishSucceededTransactionError("failed to publish succeeded transaction", err)
+		return NewPublishProcessedTransactionError("failed to publish processed transaction", err)
 	}
 
 	return nil

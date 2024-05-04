@@ -39,16 +39,16 @@ func (m *MockTransactionPublisher) EXPECT() *MockTransactionPublisherMockRecorde
 	return m.recorder
 }
 
-// PublishSucceededTransaction mocks base method.
-func (m *MockTransactionPublisher) PublishSucceededTransaction(arg0 *dto.ProcessedTransaction) error {
+// PublishProcessedTransaction mocks base method.
+func (m *MockTransactionPublisher) PublishProcessedTransaction(arg0 *dto.ProcessedTransaction) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "PublishSucceededTransaction", arg0)
+	ret := m.ctrl.Call(m, "PublishProcessedTransaction", arg0)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
-// PublishSucceededTransaction indicates an expected call of PublishSucceededTransaction.
-func (mr *MockTransactionPublisherMockRecorder) PublishSucceededTransaction(arg0 any) *gomock.Call {
+// PublishProcessedTransaction indicates an expected call of PublishProcessedTransaction.
+func (mr *MockTransactionPublisherMockRecorder) PublishProcessedTransaction(arg0 any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "PublishSucceededTransaction", reflect.TypeOf((*MockTransactionPublisher)(nil).PublishSucceededTransaction), arg0)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "PublishProcessedTransaction", reflect.TypeOf((*MockTransactionPublisher)(nil).PublishProcessedTransaction), arg0)
 }

@@ -26,6 +26,7 @@ func TestMergeWithDefault(t *testing.T) {
 			},
 			expectedCfg: &Config{
 				ProcessedTransactionTopic: testTransactionProcessedTopic,
+				ProcessMonitorTopic:       defaultProcessMonitorTopic,
 			},
 		},
 		{
@@ -33,6 +34,7 @@ func TestMergeWithDefault(t *testing.T) {
 			cfg:  &Config{},
 			expectedCfg: &Config{
 				ProcessedTransactionTopic: defaultProcessedTransactionTopic,
+				ProcessMonitorTopic:       defaultProcessMonitorTopic,
 			},
 			expectedErr: nil,
 		},

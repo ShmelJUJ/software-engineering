@@ -94,7 +94,7 @@ func (usecase *transactionUsecase) AcceptTransaction(ctx context.Context, transa
 		return err
 	}
 
-	return usecase.transactionPublisher.PublishSucceededTransaction(dto.FromTransactionModel(transaction))
+	return usecase.transactionPublisher.PublishProcessedTransaction(dto.FromTransactionModel(transaction))
 }
 
 // UpdateTransaction updates an existing transaction.

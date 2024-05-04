@@ -30,3 +30,4 @@ publisher:
   brokers:
     - kafka:29091
   processed_transaction_topic: transaction.processed
+  process_monitor_topic: monitor.process

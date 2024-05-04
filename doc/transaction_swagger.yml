@@ -5,7 +5,7 @@ info:
   license:
     name: MIT
     url: https://opensource.org/license/mit
-host: localhost:8080
+host: localhost:8083
 basePath: /api/v1
 tags:
   - name: transaction

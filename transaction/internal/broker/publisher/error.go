@@ -21,19 +21,19 @@ func (e TransactionPublisherError) Error() string {
 }
 
 // PublishSucceededTransactionError represents an error when attempting to publish a successful transaction.
-type PublishSucceededTransactionError struct {
+type PublishProcessedTransactionError struct {
 	msg string
 	err error
 }
 
-// NewPublishSucceededTransactionError creates and returns a new instance of PublishSucceededTransactionError.
-func NewPublishSucceededTransactionError(msg string, err error) *PublishSucceededTransactionError {
-	return &PublishSucceededTransactionError{
+// NewPublishProcessedTransactionError creates and returns a new instance of PublishSucceededTransactionError.
+func NewPublishProcessedTransactionError(msg string, err error) *PublishProcessedTransactionError {
+	return &PublishProcessedTransactionError{
 		msg: msg,
 		err: err,
 	}
 }
 
-func (e PublishSucceededTransactionError) Error() string {
+func (e PublishProcessedTransactionError) Error() string {
 	return fmt.Sprintf("%s: %s", e.msg, e.err.Error())
 }

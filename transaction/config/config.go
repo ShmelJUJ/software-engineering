@@ -36,6 +36,7 @@ type httpConfig struct {
 type publisherConfig struct {
 	Brokers                   []string `yaml:"brokers"`
 	ProcessedTransactionTopic string   `yaml:"processed_transaction_topic"`
+	ProcessMonitorTopic       string   `yaml:"process_monitor_topic"`
 }
 
 type topicDetails struct {

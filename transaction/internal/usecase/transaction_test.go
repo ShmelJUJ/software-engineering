@@ -366,7 +366,7 @@ func TestAcceptTransaction(t *testing.T) {
 				})
 				mtr.EXPECT().AcceptTransaction(ctx, transactionID, sender).Return(nil).Times(1)
 				mtr.EXPECT().GetTransaction(ctx, transactionID).Return(transaction, nil).Times(1)
-				mtp.EXPECT().PublishSucceededTransaction(dto.FromTransactionModel(transaction)).Return(nil).Times(1)
+				mtp.EXPECT().PublishProcessedTransaction(dto.FromTransactionModel(transaction)).Return(nil).Times(1)
 			},
 			expectedErr: nil,
 		},
@@ -414,7 +414,7 @@ func TestAcceptTransaction(t *testing.T) {
 				})
 				mtr.EXPECT().AcceptTransaction(ctx, transactionID, sender).Return(nil).Times(1)
 				mtr.EXPECT().GetTransaction(ctx, transactionID).Return(transaction, nil).Times(1)
-				mtp.EXPECT().PublishSucceededTransaction(dto.FromTransactionModel(transaction)).Return(someErr).Times(1)
+				mtp.EXPECT().PublishProcessedTransaction(dto.FromTransactionModel(transaction)).Return(someErr).Times(1)
 			},
 			expectedErr: someErr,
 		},

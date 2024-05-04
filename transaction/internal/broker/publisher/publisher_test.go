@@ -12,6 +12,10 @@ import (
 	"go.uber.org/mock/gomock"
 )
 
+const (
+	testMonitorProcessTopic = "monitor.process"
+)
+
 func transactionPublisherHelper(t *testing.T) (*mock_logger.MockLogger, *mock_publisher.MockPublisher) {
 	t.Helper()
 
@@ -83,7 +87,7 @@ func TestPublishSucceededTransaction(t *testing.T) {
 
 	processedTransaction := &dto.ProcessedTransaction{}
 
-	someErr := NewPublishSucceededTransactionError("test err", nil)
+	someErr := NewPublishProcessedTransactionError("test err", nil)
 
 	testcases := []struct {
 		name        string
@@ -92,30 +96,30 @@ func TestPublishSucceededTransaction(t *testing.T) {
 		expectedErr error
 	}{
 		{
-			name: "Successfully publish succeeded transaction",
+			name: "Successfully publish processed transaction",
 			args: args{
 				transaction: processedTransaction,
 			},
 			mock: func(ml *mock_logger.MockLogger, mp *mock_publisher.MockPublisher) {
-				ml.EXPECT().Debug("Start publish succeeded transaction", map[string]interface{}{
+				ml.EXPECT().Debug("Start publish processed transaction", map[string]interface{}{
 					"transaction": processedTransaction,
 				})
-				mp.EXPECT().Publish(testTransactionProcessedTopic, gomock.Any()).Return(nil).Times(1)
+				mp.EXPECT().Publish(testMonitorProcessTopic, gomock.Any()).Return(nil).Times(1)
 			},
 			expectedErr: nil,
 		},
 		{
-			name: "Failed to publish succeeded transaction",
+			name: "Failed to publish processed transaction",
 			args: args{
 				transaction: processedTransaction,
 			},
 			mock: func(ml *mock_logger.MockLogger, mp *mock_publisher.MockPublisher) {
-				ml.EXPECT().Debug("Start publish succeeded transaction", map[string]interface{}{
+				ml.EXPECT().Debug("Start publish processed transaction", map[string]interface{}{
 					"transaction": processedTransaction,
 				})
-				mp.EXPECT().Publish(testTransactionProcessedTopic, gomock.Any()).Return(someErr).Times(1)
+				mp.EXPECT().Publish(testMonitorProcessTopic, gomock.Any()).Return(someErr).Times(1)
 			},
-			expectedErr: NewPublishSucceededTransactionError("failed to publish succeeded transaction", someErr),
+			expectedErr: NewPublishProcessedTransactionError("failed to publish processed transaction", someErr),
 		},
 	}
 
@@ -138,7 +142,7 @@ func TestPublishSucceededTransaction(t *testing.T) {
 			)
 			assert.NoError(t, err)
 
-			err = transactionPublisher.PublishSucceededTransaction(testcase.args.transaction)
+			err = transactionPublisher.PublishProcessedTransaction(testcase.args.transaction)
 			assert.Equal(t, testcase.expectedErr, err)
 		})
 	}
