@@ -10,6 +10,7 @@ COPY --from=modules /go/pkg /go/pkg
 COPY ./monitor/config /app/config
 COPY ./pkg /app/pkg
 COPY ./monitor /app/monitor
+COPY ./user/gen /app/user/gen
 COPY go.mod go.sum /app/
 WORKDIR /app
 RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 \

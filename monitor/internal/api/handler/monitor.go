@@ -9,6 +9,7 @@ import (
 	"github.com/ShmelJUJ/software-engineering/pkg/logger"
 	gen "github.com/ShmelJUJ/software-engineering/user/gen"
 	"github.com/go-openapi/runtime/middleware"
+	"github.com/mitchellh/mapstructure"
 )
 
 const (
@@ -74,16 +75,17 @@ func (mh *MonitorHandler) processRequest(params apiMonitor.ProcessParams) middle
 	case userService:
 		switch method {
 		case getUserMethod:
-			dto, ok := params.Body.Payload.(gen.GetClientByIdParams)
-			if !ok {
+			dto := &gen.GetClientByIdParams{}
+			err := mapstructure.Decode(params.Body.Payload, dto)
+			if err != nil {
 				return apiMonitor.NewProcessBadRequest().
 					WithPayload(&models.ErrorResponse{
 						Code:    int32(apiMonitor.ProcessBadRequestCode),
-						Message: "failed to cast payload to gen.GetClientByIdParams",
+						Message: fmt.Sprintf("failed to decode payload to gen.GetClientByIdParams: %s", err.Error()),
 					})
 			}
 
-			client, err := mh.userClient.GetClientById(ctx, dto)
+			client, err := mh.userClient.GetClientById(ctx, *dto)
 			if err != nil {
 				return apiMonitor.NewProcessInternalServerError().
 					WithPayload(&models.ErrorResponse{
@@ -105,16 +107,17 @@ func (mh *MonitorHandler) processRequest(params apiMonitor.ProcessParams) middle
 			}
 
 		case getWalletMethod:
-			dto, ok := params.Body.Payload.(gen.GetWalletByIdParams)
-			if !ok {
+			dto := &gen.GetWalletByIdParams{}
+			err := mapstructure.Decode(params.Body.Payload, dto)
+			if err != nil {
 				return apiMonitor.NewProcessBadRequest().
 					WithPayload(&models.ErrorResponse{
 						Code:    int32(apiMonitor.ProcessBadRequestCode),
-						Message: "failed to cast payload to gen.GetWalletByIdParams",
+						Message: fmt.Sprintf("failed to decode payload to gen.GetWalletByIdParams: %s", err.Error()),
 					})
 			}
 
-			wallet, err := mh.userClient.GetWalletById(ctx, dto)
+			wallet, err := mh.userClient.GetWalletById(ctx, *dto)
 			if err != nil {
 				return apiMonitor.NewProcessInternalServerError().
 					WithPayload(&models.ErrorResponse{
