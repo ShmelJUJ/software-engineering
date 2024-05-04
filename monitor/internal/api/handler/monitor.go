@@ -76,8 +76,8 @@ func (mh *MonitorHandler) processRequest(params apiMonitor.ProcessParams) middle
 		switch method {
 		case getUserMethod:
 			dto := &gen.GetClientByIdParams{}
-			err := mapstructure.Decode(params.Body.Payload, dto)
-			if err != nil {
+
+			if err := mapstructure.Decode(params.Body.Payload, dto); err != nil {
 				return apiMonitor.NewProcessBadRequest().
 					WithPayload(&models.ErrorResponse{
 						Code:    int32(apiMonitor.ProcessBadRequestCode),
@@ -108,8 +108,8 @@ func (mh *MonitorHandler) processRequest(params apiMonitor.ProcessParams) middle
 
 		case getWalletMethod:
 			dto := &gen.GetWalletByIdParams{}
-			err := mapstructure.Decode(params.Body.Payload, dto)
-			if err != nil {
+
+			if err := mapstructure.Decode(params.Body.Payload, dto); err != nil {
 				return apiMonitor.NewProcessBadRequest().
 					WithPayload(&models.ErrorResponse{
 						Code:    int32(apiMonitor.ProcessBadRequestCode),
