@@ -17,6 +17,10 @@ import (
 
 //go:generate mockgen -package mocks -destination mocks/worker_mocks.go github.com/ShmelJUJ/software-engineering/payment_gateway/internal/broker/publisher PaymentWorker
 
+const (
+	paymentGatewayService = "payment_gateway"
+)
+
 // StopReason represents the reason for stopping a PaymentWorker.
 type StopReason int
 
@@ -167,13 +171,19 @@ func (worker *paymentWorker) handleFailedTransaction(reason string) error {
 		Reason:        reason,
 	}
 
-	payload, err := failedTransaction.Encode()
+	monitorDTO := &dto.Process{
+		From:    paymentGatewayService,
+		ToTopic: worker.cfg.FailedTransactionTopic,
+		Payload: failedTransaction,
+	}
+
+	payload, err := monitorDTO.Encode()
 	if err != nil {
 		return NewProccessPaymentError("failed to encode transaction", err)
 	}
 
 	if err := worker.pub.Publish(
-		worker.cfg.FailedTransactionTopic,
+		worker.cfg.MonitorProcessTopic,
 		message.NewMessage(
 			watermill.NewUUID(),
 			payload,
@@ -197,13 +207,19 @@ func (worker *paymentWorker) handleSucceededTransaction() error {
 		TransactionID: worker.gateway.TransactionID(),
 	}
 
-	payload, err := succeededTransaction.Encode()
+	monitorDTO := &dto.Process{
+		From:    paymentGatewayService,
+		ToTopic: worker.cfg.SucceededTransactionTopic,
+		Payload: succeededTransaction,
+	}
+
+	payload, err := monitorDTO.Encode()
 	if err != nil {
-		return NewProccessPaymentError("failed to encode transaction", err)
+		return NewProccessPaymentError("failed to encode monitor dto", err)
 	}
 
 	if err := worker.pub.Publish(
-		worker.cfg.SucceededTransactionTopic,
+		worker.cfg.MonitorProcessTopic,
 		message.NewMessage(
 			watermill.NewUUID(),
 			payload,

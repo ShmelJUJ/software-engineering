@@ -11,6 +11,8 @@ import (
 	kafka_mocks "github.com/ShmelJUJ/software-engineering/pkg/kafka/mocks"
 	"github.com/ShmelJUJ/software-engineering/pkg/logger"
 	logger_mocks "github.com/ShmelJUJ/software-engineering/pkg/logger/mocks"
+	monitor_client "github.com/ShmelJUJ/software-engineering/pkg/monitor_client/client/monitor"
+	monitor_client_mocks "github.com/ShmelJUJ/software-engineering/pkg/monitor_client/mocks"
 	"github.com/ThreeDotsLabs/watermill"
 	"github.com/ThreeDotsLabs/watermill/message"
 	"github.com/alitto/pond"
@@ -29,6 +31,7 @@ func subscriberHelper(t *testing.T) (
 	*kafka_mocks.MockSubscriber,
 	*kafka_mocks.MockPublisher,
 	*worker_mocks.MockPaymentWorker,
+	*monitor_client_mocks.MockClientService,
 ) {
 	t.Helper()
 
@@ -39,8 +42,9 @@ func subscriberHelper(t *testing.T) (
 	s := kafka_mocks.NewMockSubscriber(mockCtrl)
 	p := kafka_mocks.NewMockPublisher(mockCtrl)
 	w := worker_mocks.NewMockPaymentWorker(mockCtrl)
+	monitorClient := monitor_client_mocks.NewMockClientService(mockCtrl)
 
-	return log, s, p, w
+	return log, s, p, w, monitorClient
 }
 
 func TestNewTransactionSubscriber(t *testing.T) {
@@ -54,15 +58,17 @@ func TestNewTransactionSubscriber(t *testing.T) {
 	log := logger_mocks.NewMockLogger(mockCtrl)
 	p := kafka_mocks.NewMockPublisher(mockCtrl)
 	s := kafka_mocks.NewMockSubscriber(mockCtrl)
+	monitorClient := monitor_client_mocks.NewMockClientService(mockCtrl)
 
 	type args struct {
-		cfg          *Config
-		logger       logger.Logger
-		router       *message.Router
-		subscriber   message.Subscriber
-		publisher    message.Publisher
-		publisherCfg *publisher.Config
-		algorandCfg  *algorand.Config
+		cfg           *Config
+		logger        logger.Logger
+		router        *message.Router
+		subscriber    message.Subscriber
+		publisher     message.Publisher
+		publisherCfg  *publisher.Config
+		algorandCfg   *algorand.Config
+		monitorClient monitor_client.ClientService
 	}
 
 	testcases := []struct {
@@ -74,13 +80,14 @@ func TestNewTransactionSubscriber(t *testing.T) {
 		{
 			name: "With default config",
 			args: args{
-				cfg:          &Config{},
-				logger:       log,
-				router:       &message.Router{},
-				subscriber:   s,
-				publisher:    p,
-				publisherCfg: &publisher.Config{},
-				algorandCfg:  &algorand.Config{},
+				cfg:           &Config{},
+				logger:        log,
+				router:        &message.Router{},
+				subscriber:    s,
+				publisher:     p,
+				publisherCfg:  &publisher.Config{},
+				algorandCfg:   &algorand.Config{},
+				monitorClient: monitorClient,
 			},
 			expectedTransactionSubscriber: &TransactionSubscriber{
 				paymentWorkers: sync.Map{},
@@ -94,9 +101,10 @@ func TestNewTransactionSubscriber(t *testing.T) {
 					pond.IdleTimeout(defaultIdleTimeout),
 					pond.MinWorkers(defaultMinWorkers),
 				),
-				cfg:         getDefaultConfig(),
-				algorandCfg: &algorand.Config{},
-				log:         log,
+				cfg:           getDefaultConfig(),
+				algorandCfg:   &algorand.Config{},
+				log:           log,
+				monitorClient: monitorClient,
 			},
 			expectedErr: nil,
 		},
@@ -109,12 +117,13 @@ func TestNewTransactionSubscriber(t *testing.T) {
 					},
 					ProcessedTransactionTopic: processedTopic,
 				},
-				logger:       log,
-				router:       &message.Router{},
-				subscriber:   s,
-				publisher:    p,
-				publisherCfg: &publisher.Config{},
-				algorandCfg:  &algorand.Config{},
+				logger:        log,
+				router:        &message.Router{},
+				subscriber:    s,
+				publisher:     p,
+				publisherCfg:  &publisher.Config{},
+				algorandCfg:   &algorand.Config{},
+				monitorClient: monitorClient,
 			},
 			expectedTransactionSubscriber: &TransactionSubscriber{
 				paymentWorkers: sync.Map{},
@@ -138,8 +147,9 @@ func TestNewTransactionSubscriber(t *testing.T) {
 					ProcessedTransactionTopic: processedTopic,
 					CancelledTransactionTopic: defaultCancelledTransactionTopic,
 				},
-				algorandCfg: &algorand.Config{},
-				log:         log,
+				algorandCfg:   &algorand.Config{},
+				log:           log,
+				monitorClient: monitorClient,
 			},
 			expectedErr: nil,
 		},
@@ -159,6 +169,7 @@ func TestNewTransactionSubscriber(t *testing.T) {
 				testcase.args.publisher,
 				testcase.args.publisherCfg,
 				testcase.args.algorandCfg,
+				testcase.args.monitorClient,
 			)
 
 			assert.Equal(t, testcase.expectedTransactionSubscriber.cfg, actualTransactionSubscriber.cfg)
@@ -167,6 +178,7 @@ func TestNewTransactionSubscriber(t *testing.T) {
 			assert.Equal(t, testcase.expectedTransactionSubscriber.publisherCfg, actualTransactionSubscriber.publisherCfg)
 			assert.Equal(t, testcase.expectedTransactionSubscriber.router, actualTransactionSubscriber.router)
 			assert.Equal(t, testcase.expectedTransactionSubscriber.sub, actualTransactionSubscriber.sub)
+			assert.Equal(t, testcase.expectedTransactionSubscriber.monitorClient, actualTransactionSubscriber.monitorClient)
 			assert.Equal(t, testcase.expectedErr, err)
 		})
 	}
@@ -207,7 +219,7 @@ func TestHandleProcessedTransaction(t *testing.T) {
 		t.Run(testcase.name, func(t *testing.T) {
 			t.Parallel()
 
-			mockLog, mockSubscriber, mockPublisher, _ := subscriberHelper(t)
+			mockLog, mockSubscriber, mockPublisher, _, monitorClient := subscriberHelper(t)
 			testcase.mock(mockLog)
 
 			transactionSubscriber, err := NewTransactionSubscriber(
@@ -218,6 +230,7 @@ func TestHandleProcessedTransaction(t *testing.T) {
 				mockPublisher,
 				&publisher.Config{},
 				&algorand.Config{},
+				monitorClient,
 			)
 			assert.NoError(t, err)
 
@@ -278,7 +291,7 @@ func TestHandleCancelledTransaction(t *testing.T) {
 		t.Run(testcase.name, func(t *testing.T) {
 			t.Parallel()
 
-			mockLog, mockSubscriber, mockPublisher, mockWorker := subscriberHelper(t)
+			mockLog, mockSubscriber, mockPublisher, mockWorker, monitorClient := subscriberHelper(t)
 			testcase.mock(mockLog, mockWorker)
 
 			transactionSubscriber, err := NewTransactionSubscriber(
@@ -289,6 +302,7 @@ func TestHandleCancelledTransaction(t *testing.T) {
 				mockPublisher,
 				&publisher.Config{},
 				&algorand.Config{},
+				monitorClient,
 			)
 			assert.NoError(t, err)
 

@@ -1,0 +1,399 @@
+swagger: '2.0'
+info:
+  version: v1
+  title: Transaction Service
+  license:
+    name: MIT
+    url: https://opensource.org/license/mit
+host: localhost:8083
+basePath: /api/v1
+tags:
+  - name: transaction
+    description: Methods for transaction management.
+schemes:
+  - http
+paths:
+  /transaction/{id}/accept:
+    post:
+      tags:
+        - transaction
+      summary: The method is used to accept the transaction.
+      operationId: acceptTransaction
+      produces:
+        - application/json
+      parameters:
+        - name: id
+          in: path
+          description: Transaction id to retrieve.
+          required: true
+          type: string
+          format: uuid
+        - in: body
+          name: body
+          description: Information required to accpet a transaction.
+          required: true
+          schema:
+            $ref: '#/definitions/AcceptTransactionRequest'
+        - name: X-Idempotency-Key
+          in: header
+          required: false
+          type: string
+          format: uuid
+      responses:
+        '200':
+          description: Transaction successfully accepted.
+        '403':
+          description: Forbidden error.
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        '404':
+          description: Not found error.
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        '500':
+          description: Internal server error.
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+      # security:
+      #   - qr_payment_auth:
+      #       - write:transactions
+  /transaction/{id}/edit:
+    post:
+      tags:
+        - transaction
+      summary: The method is used to edit a transaction.
+      operationId: editTransaction
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - name: id
+          in: path
+          description: Transaction id to edit.
+          required: true
+          type: string
+          format: uuid
+        - in: body
+          name: body
+          description: Information required to change a transaction.
+          required: true
+          schema:
+            $ref: '#/definitions/EditTransactionRequest'
+        - name: X-Idempotency-Key
+          in: header
+          required: false
+          type: string
+          format: uuid
+      responses:
+        '200':
+          description: Transaction successfully edited.
+        '400':
+          description: Validation error.
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        '403':
+          description: Forbidden error.
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        '404':
+          description: Not found error.
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        '500':
+          description: Internal server error.
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+      # security:
+      #   - qr_payment_auth:
+      #       - write:transactions
+  /transaction/{id}/cancel:
+    post:
+      tags:
+        - transaction
+      summary: The method is used to cancel a transaction.
+      operationId: cancelTransaction
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - name: id
+          in: path
+          description: Transaction id to cancel.
+          required: true
+          type: string
+          format: uuid
+        - in: body
+          name: body
+          description: Information required to cancel a transaction.
+          required: true
+          schema:
+            $ref: '#/definitions/CancelTransactionRequest'
+        - name: X-Idempotency-Key
+          in: header
+          required: false
+          type: string
+          format: uuid
+      responses:
+        '200':
+          description: Transaction successfully cancelled.
+        '403':
+          description: Forbidden error.
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        '404':
+          description: Not found error.
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        '500':
+          description: Internal server error.
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+      # security:
+      #   - qr_payment_auth:
+      #       - write:transactions
+  /transaction/{id}/retrieve/status:
+    get:
+      tags:
+        - transaction
+      summary: The method is used to get the status of the transaction.
+      operationId: retrieveTransactionStatus
+      produces:
+        - application/json
+      parameters:
+        - name: id
+          in: path
+          description: Transaction id to retrieve status.
+          required: true
+          type: string
+          format: uuid
+      responses:
+        '200':
+          description: Transaction status successfully retrieved.
+          schema:
+            $ref: '#/definitions/GetTransactionStatusResponse'
+        '403':
+          description: Forbidden error.
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        '404':
+          description: Not found error.
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        '500':
+          description: Internal server error.
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+      # security:
+      #   - qr_payment_auth:
+      #       - read:transactions
+  /transaction/{id}/retrieve:
+    get:
+      tags:
+        - transaction
+      summary: The method is used to retrieve the transaction.
+      operationId: retrieveTransaction
+      produces:
+        - application/json
+      parameters:
+        - name: id
+          in: path
+          description: Transaction id to retrieve.
+          required: true
+          type: string
+          format: uuid
+      responses:
+        '200':
+          description: Transaction successfully retrieved.
+          schema:
+            $ref: '#/definitions/GetTransactionResponse'
+        '403':
+          description: Forbidden error.
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        '404':
+          description: Not found error.
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        '500':
+          description: Internal server error.
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+      # security:
+      #   - qr_payment_auth:
+      #       - read:transactions
+  /transaction/create:
+    post:
+      tags:
+        - transaction
+      summary: The method is used to create transactions.
+      operationId: createTransaction
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - in: body
+          name: body
+          description: Created transaction object.
+          required: true
+          schema:
+            $ref: '#/definitions/CreateTransactionRequest'
+        - name: X-Idempotency-Key
+          in: header
+          required: false
+          type: string
+          format: uuid
+      responses:
+        '200':
+          description: Transaction successfully created.
+          schema:
+            $ref: '#/definitions/CreateTransactionResponse'
+        '400':
+          description: Validation error.
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        '403':
+          description: Forbidden error.
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        '500':
+          description: Internal server error.
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+      # security:
+      #   - qr_payment_auth:
+      #       - write:transactions
+# securityDefinitions:
+#   qr_payment_auth:
+#     type: oauth2
+#     flow: accessCode
+#     authorizationUrl: 'https://accounts.google.com/o/oauth2/v2/auth'
+#     tokenUrl: 'https://www.googleapis.com/oauth2/v4/token'
+#     scopes:
+#       read:transactions: Read your transaction.
+#       write:transactions: Modify your transactions.
+definitions:
+  ErrorResponse:
+    type: object
+    properties:
+      code:
+        type: integer
+        format: int32
+      message:
+        type: string
+  GetTransactionResponse:
+    type: object
+    required:
+      - receiver
+      - currency
+      - amount
+      - status
+      - method
+    properties:
+      sender:
+         $ref: '#/definitions/GetTransactionUserResponse'
+      receiver:
+         $ref: '#/definitions/GetTransactionUserResponse'
+      currency:
+        type: string
+      amount:
+        type: integer
+        format: int64
+      status:
+        type: string
+        enum: [created, processed, canceled, failed, succeeded]
+      method:
+        type: string
+  CreateTransactionRequest:
+    type: object
+    required:
+     - money_info
+     - receiver
+    properties:
+      money_info:
+        $ref: '#/definitions/MoneyInfo'
+      receiver:
+        $ref: '#/definitions/CreateTransactionUserRequest'
+  CreateTransactionResponse:
+    type: object
+    required:
+      - transaction_id
+    properties:
+      transaction_id:
+        type: string
+        format: uuid
+  GetTransactionStatusResponse:
+    type: object
+    required:
+     - transaction_status
+    properties:
+      transaction_status:
+        type: string
+        enum: [created, processed, canceled, failed, succeeded]
+  CancelTransactionRequest:
+    type: object
+    properties:
+      reason:
+        type: string
+  EditTransactionRequest:
+    type: object
+    properties:
+      money_info:
+        $ref: '#/definitions/EditMoneyInfo'
+  AcceptTransactionRequest:
+    type: object
+    required:
+      - sender
+    properties:
+      sender:
+        $ref: '#/definitions/AcceptTransactionUserRequest'
+  AcceptTransactionUserRequest:
+    type: object
+    required:
+      - user_id
+    properties:
+      user_id:
+        type: string
+        format: uuid
+  MoneyInfo:
+    type: object
+    required:
+      - method
+      - currency
+      - amount
+    properties:
+      method:
+        type: string
+      currency:
+        type: string
+      amount:
+        type: integer
+        format: int64
+  EditMoneyInfo:
+    type: object
+    properties:
+      method:
+        type: string
+      currency:
+        type: string
+      amount:
+        type: integer
+        format: int64
+  GetTransactionUserResponse:
+    type: object
+    required:
+     - user_id
+    properties:
+      user_id:
+        type: string
+        format: uuid
+  CreateTransactionUserRequest:
+    type: object
+    required:
+    - user_id
+    properties:
+      user_id:
+        type: string
+        format: uuid

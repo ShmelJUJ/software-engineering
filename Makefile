@@ -22,6 +22,34 @@ precommit: format lint
 	echo "OK"
 .PHONY: precommit
 
+gen-transaction-service:
+	swagger generate server \
+		-f ./doc/transaction_swagger.yml \
+        -t ./transaction/internal/generated -C ./transaction/swagger-templates/server.yml \
+        --template-dir ./transaction/swagger-templates/templates \
+        --name transaction
+.PHONY: gen-transaction-service
+
+gen-monitor-service:
+	swagger generate server \
+		-f ./doc/monitor_swagger.yml \
+        -t ./monitor/internal/generated -C ./monitor/swagger-templates/server.yml \
+        --template-dir ./monitor/swagger-templates/templates \
+        --name monitor
+.PHONY: gen-monitor-service
+
+gen-monitor-client:
+	swagger generate client \
+		-f ./doc/monitor_swagger.yml \
+		-t ./pkg/monitor_client \
+		-A MonitorAPI
+	${MOCKGENBIN} -package mocks -destination pkg/monitor_client/mocks/monitor_client_mocks.go github.com/ShmelJUJ/software-engineering/pkg/monitor_client/client/monitor ClientService
+.PHONY: gen-monitor-client
+
+gen-user:
+	go generate -run github.com/ogen-go/ogen/cmd/ogen@latest ./...
+.PHONY: gen-user
+
 # ==============================================================================
 # Tools commands
 
@@ -33,7 +61,7 @@ install-mockgen: bindir
 .PHONY: install-mockgen
 
 gen-mocks: install-mockgen
-	go generate ./...
+	go generate -run mockgen ./...
 .PHONY: gen-mocks
 
 install-lint: bindir

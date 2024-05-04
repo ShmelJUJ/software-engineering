@@ -20,6 +20,7 @@ const (
 	timeout        = 50 * time.Millisecond
 	failedTopic    = "failed"
 	succeededTopic = "succeeded"
+	monitorTopic   = "monitor.process"
 )
 
 func publisherHelper(t *testing.T) (*logger_mocks.MockLogger, *gateway_mocks.MockPaymentGateway, *kafka_mocks.MockPublisher) {
@@ -130,7 +131,7 @@ func TestStartWorker(t *testing.T) {
 					"transaction_id": transactionID,
 					"reason":         "Payment gateway cancelled the transaction",
 				}).Times(1)
-				mp.EXPECT().Publish(failedTopic, gomock.Any()).Return(nil).Times(1)
+				mp.EXPECT().Publish(monitorTopic, gomock.Any()).Return(nil).Times(1)
 			},
 			expectedErr: nil,
 		},
@@ -159,7 +160,7 @@ func TestStartWorker(t *testing.T) {
 				ml.EXPECT().Debug("Payment worker handle succeeded transaction", map[string]interface{}{
 					"transaction_id": transactionID,
 				}).Times(1)
-				mp.EXPECT().Publish(succeededTopic, gomock.Any()).Return(nil).Times(1)
+				mp.EXPECT().Publish(monitorTopic, gomock.Any()).Return(nil).Times(1)
 			},
 			expectedErr: nil,
 		},

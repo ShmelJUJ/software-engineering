@@ -11,8 +11,18 @@ import (
 	"github.com/ShmelJUJ/software-engineering/payment_gateway/internal/gateway/algorand"
 	gateway_stub "github.com/ShmelJUJ/software-engineering/payment_gateway/internal/gateway/stub"
 	"github.com/ShmelJUJ/software-engineering/pkg/logger"
+	monitor_client "github.com/ShmelJUJ/software-engineering/pkg/monitor_client/client/monitor"
+	"github.com/ShmelJUJ/software-engineering/pkg/monitor_client/models"
+	gen "github.com/ShmelJUJ/software-engineering/user/gen"
 	"github.com/ThreeDotsLabs/watermill/message"
 	"github.com/alitto/pond"
+)
+
+const (
+	paymentGatewayService = "payment_gateway"
+	userService           = "user"
+
+	getWalletMethod = "getWalletByID"
 )
 
 // TransactionSubscriber represents a subscriber handling transaction-related messages.
@@ -26,6 +36,7 @@ type TransactionSubscriber struct {
 	cfg            *Config
 	algorandCfg    *algorand.Config
 	log            logger.Logger
+	monitorClient  monitor_client.ClientService
 }
 
 // NewTransactionSubscriber creates a new instance of TransactionSubscriber.
@@ -37,6 +48,7 @@ func NewTransactionSubscriber(
 	pub message.Publisher,
 	publisherCfg *publisher.Config,
 	algorandCfg *algorand.Config,
+	monitorClient monitor_client.ClientService,
 ) (*TransactionSubscriber, error) {
 	cfg, err := mergeWithDefault(cfg)
 	if err != nil {
@@ -52,6 +64,7 @@ func NewTransactionSubscriber(
 		cfg:            cfg,
 		algorandCfg:    algorandCfg,
 		log:            log,
+		monitorClient:  monitorClient,
 
 		pool: pond.New(
 			cfg.PoolCfg.NumWorkers,
@@ -136,11 +149,52 @@ func (s *TransactionSubscriber) getPaymentGateway(processedTransaction *dto.Proc
 			return gateway_stub.New(processedTransaction.Transaction.ToTransactionInfo()), nil
 		}
 
+		from := paymentGatewayService
+		to := userService
+		method := getWalletMethod
+
+		senderResp, err := s.monitorClient.Process(&monitor_client.ProcessParams{
+			Body: &models.ProcessRequest{
+				From:    &from,
+				To:      &to,
+				Method:  &method,
+				Payload: gen.GetWalletByIdParams{},
+			},
+		})
+		if err != nil {
+			return nil, fmt.Errorf("failed to process getWalletById request to monitor: %w", err)
+		}
+
+		senderWallet, ok := senderResp.Payload.(gen.Wallet)
+		if !ok {
+			return nil, fmt.Errorf("failed to cast sender response to wallet: %w", err)
+		}
+
+		receiverResp, err := s.monitorClient.Process(&monitor_client.ProcessParams{
+			Body: &models.ProcessRequest{
+				From:    &from,
+				To:      &to,
+				Method:  &method,
+				Payload: gen.GetWalletByIdParams{},
+			},
+		})
+
+		receiverWallet, ok := receiverResp.Payload.(gen.Wallet)
+		if !ok {
+			return nil, fmt.Errorf("failed to cast receiver response to wallet: %w", err)
+		}
+
 		algorandGateway, err := algorand.New(
 			s.algorandCfg,
 			processedTransaction.Transaction.ToTransactionInfo(),
-			&algorand.UserData{},
-			&algorand.UserData{},
+			&algorand.UserData{
+				WalletAddress: senderWallet.PublicKey,
+				Mnemonic:      senderWallet.PrivateKey,
+			},
+			&algorand.UserData{
+				WalletAddress: receiverWallet.PublicKey,
+				Mnemonic:      receiverWallet.PrivateKey,
+			},
 		)
 		if err != nil {
 			return nil, fmt.Errorf("failed to create algorand gateway: %w", err)

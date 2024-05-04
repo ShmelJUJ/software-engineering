@@ -75,18 +75,18 @@ func NewSubscriber(brokers []string, opts ...SubscriberOption) (message.Subscrib
 	subscriberConfig := defaultSubscriberConfig
 	subscriberConfig.Brokers = brokers
 
+	for _, opt := range opts {
+		if err := opt(&subscriberConfig); err != nil {
+			return nil, fmt.Errorf("failed to apply option: %w", err)
+		}
+	}
+
 	connAttempts := defaultConnAttemts
 	connTimeout := defaultConnTimeout
 
 	log, err := logger.NewLogrusLogger("info")
 	if err != nil {
 		return nil, fmt.Errorf("failed to create new logger: %w", err)
-	}
-
-	for _, opt := range opts {
-		if err := opt(&subscriberConfig); err != nil {
-			return nil, fmt.Errorf("failed to apply option: %w", err)
-		}
 	}
 
 	var subscriber message.Subscriber

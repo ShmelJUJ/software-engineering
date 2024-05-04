@@ -61,18 +61,18 @@ func NewPublisher(brokers []string, opts ...PublisherOption) (message.Publisher,
 	publisherConfig := defaultPublisherConfig
 	publisherConfig.Brokers = brokers
 
+	for _, opt := range opts {
+		if err := opt(&publisherConfig); err != nil {
+			return nil, fmt.Errorf("failed to apply option: %w", err)
+		}
+	}
+
 	connAttempts := defaultConnAttemts
 	connTimeout := defaultConnTimeout
 
 	log, err := logger.NewLogrusLogger("info")
 	if err != nil {
 		return nil, fmt.Errorf("failed to create new logger: %w", err)
-	}
-
-	for _, opt := range opts {
-		if err := opt(&publisherConfig); err != nil {
-			return nil, fmt.Errorf("failed to apply option: %w", err)
-		}
 	}
 
 	var publisher message.Publisher

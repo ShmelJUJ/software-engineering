@@ -13,6 +13,9 @@ import (
 	"github.com/ShmelJUJ/software-engineering/payment_gateway/internal/broker/subscriber"
 	"github.com/ShmelJUJ/software-engineering/pkg/kafka"
 	"github.com/ShmelJUJ/software-engineering/pkg/logger"
+	monitor_client "github.com/ShmelJUJ/software-engineering/pkg/monitor_client/client"
+	httptransport "github.com/go-openapi/runtime/client"
+	"github.com/go-openapi/strfmt"
 )
 
 const (
@@ -82,6 +85,15 @@ func Run(cfg *config.Config) {
 		})
 	}
 
+	monitorClientCfg := monitor_client.DefaultTransportConfig().
+		WithBasePath("api/v1").
+		WithHost("host.docker.internal:8080").
+		WithSchemes([]string{"http"})
+
+	transport := httptransport.New(monitorClientCfg.Host, monitorClientCfg.BasePath, monitorClientCfg.Schemes)
+
+	monitorClient := monitor_client.New(transport, strfmt.Default)
+
 	sub, err := subscriber.NewTransactionSubscriber(
 		cfg.KafkaSubscriberCfg.SubscriberCfg,
 		l,
@@ -90,6 +102,7 @@ func Run(cfg *config.Config) {
 		kafkaPublisher,
 		cfg.KafkaPublisherCfg.PublisherCfg,
 		cfg.AlgorandCfg,
+		monitorClient.Monitor,
 	)
 	if err != nil {
 		l.Fatal("failed to create new transaction subscriber", map[string]interface{}{

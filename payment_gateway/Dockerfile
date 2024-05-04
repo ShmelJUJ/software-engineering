@@ -9,6 +9,7 @@ FROM golang:1.22-alpine3.19 as builder
 COPY --from=modules /go/pkg /go/pkg
 COPY ./payment_gateway/config /app/config
 COPY ./pkg /app/pkg
+COPY ./user/gen /app/user/gen
 COPY ./payment_gateway /app/payment_gateway
 COPY go.mod go.sum /app/
 WORKDIR /app

@@ -31,3 +31,4 @@ kafka_publisher:
     payment_proccessing_time: 30s
     succeeded_transaction_topic: transaction.succeeded
     failed_transaction_topic: transaction.failed
+    monitor_process_topic: monitor.process

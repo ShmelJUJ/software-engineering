@@ -14,10 +14,12 @@ const (
 	defaultPaymentProccessingTime    = 30 * time.Second
 	defaultSucceededTransactionTopic = "transaction.succeeded"
 	defaultFailedTransactionTopic    = "transaction.failed"
+	defaultMonitorProcessTopic       = "monitor.process"
 )
 
 // Config represents publisher configuration parameters.
 type Config struct {
+	MonitorProcessTopic       string        `yaml:"monitor_process_topic"`
 	PaymentProccessingTime    time.Duration `yaml:"payment_processing_time"`
 	SucceededTransactionTopic string        `yaml:"succeeded_transaction_topic"`
 	FailedTransactionTopic    string        `yaml:"failed_transaction_topic"`
@@ -25,6 +27,7 @@ type Config struct {
 
 func getDefaultConfig() *Config {
 	return &Config{
+		MonitorProcessTopic:       defaultMonitorProcessTopic,
 		PaymentProccessingTime:    defaultPaymentProccessingTime,
 		SucceededTransactionTopic: defaultSucceededTransactionTopic,
 		FailedTransactionTopic:    defaultFailedTransactionTopic,

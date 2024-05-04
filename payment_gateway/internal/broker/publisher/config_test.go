@@ -23,6 +23,7 @@ func TestMergeWithDefault(t *testing.T) {
 				FailedTransactionTopic: "transaction.failed2",
 			},
 			expectedCfg: &Config{
+				MonitorProcessTopic:       defaultMonitorProcessTopic,
 				PaymentProccessingTime:    time.Minute,
 				SucceededTransactionTopic: defaultSucceededTransactionTopic,
 				FailedTransactionTopic:    "transaction.failed2",
@@ -32,6 +33,7 @@ func TestMergeWithDefault(t *testing.T) {
 			name: "With empty config",
 			cfg:  &Config{},
 			expectedCfg: &Config{
+				MonitorProcessTopic:       defaultMonitorProcessTopic,
 				PaymentProccessingTime:    defaultPaymentProccessingTime,
 				SucceededTransactionTopic: defaultSucceededTransactionTopic,
 				FailedTransactionTopic:    defaultFailedTransactionTopic,
