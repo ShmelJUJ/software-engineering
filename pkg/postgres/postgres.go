@@ -124,6 +124,10 @@ func New(ctx context.Context, url string, opts ...Option) (*Postgres, error) {
 	return p, nil
 }
 
+func (p *Postgres) GetTransactionConn(ctx context.Context) trmpgx.Tr {
+	return trmpgx.DefaultCtxGetter.DefaultTrOrDB(ctx, p.Pool)
+}
+
 // Close closes the Postgres pool.
 func (p *Postgres) Close() {
 	if p.Pool != nil {

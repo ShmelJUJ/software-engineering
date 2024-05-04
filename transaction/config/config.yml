@@ -1,0 +1,33 @@
+logger:
+  level: debug
+
+http:
+  port: 8080
+
+postgres:
+  dialect: postgres
+  pool_max: 10
+  url: postgres://postgres:root@transaction_postgres:5432/postgres?sslmode=disable
+
+redis:
+  url: redis://transaction_redis:6379/0
+
+middleware:
+  idempotency:
+    name: global
+    header_key: X-Idempotency-Key
+
+subscriber:
+  brokers:
+    - kafka:29091
+  topic_details:
+    num_partitions: 1
+    replication_factor: 1
+  succeeded_transaction_topic: transaction.succeeded
+  failed_transaction_topic: transaction.failed
+
+publisher:
+  brokers:
+    - kafka:29091
+  processed_transaction_topic: transaction.processed
+  process_monitor_topic: monitor.process

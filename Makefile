@@ -22,6 +22,14 @@ precommit: format lint
 	echo "OK"
 .PHONY: precommit
 
+gen-transaction-service:
+	swagger generate server \
+		-f ./doc/transaction_swagger.yml \
+        -t ./transaction/internal/generated -C ./transaction/swagger-templates/server.yml \
+        --template-dir ./transaction/swagger-templates/templates \
+        --name transaction
+.PHONY: gen-transaction-service
+
 gen-monitor-service:
 	swagger generate server \
 		-f ./doc/monitor_swagger.yml \

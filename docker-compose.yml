@@ -1,6 +1,41 @@
 version: '3.5'
 
 services:
+  transaction:
+    build:
+      context: .
+      dockerfile: ./transaction/Dockerfile
+    container_name: transaction
+    image: transaction
+    environment:
+      PG_URL: 'postgres://postgres:root@transaction_postgres:5432/postgres?sslmode=disable'
+    ports:
+      - 8083:8080
+    depends_on:
+      transaction_postgres:
+        condition: service_healthy
+      transaction_redis:
+        condition: service_healthy
+      kafka:
+        condition: service_started
+  
+  transaction_postgres:
+    container_name: transaction_pg_db
+    ports:
+      - 5432:5432
+    environment:
+      - POSTGRES_PASSWORD=root
+      - POSTGRES_USER=postgres
+      - POSTGRES_DB=postgres
+    volumes:
+      - transaction-pg-data:/var/lib/postgresql/data
+    image: postgres:15-alpine
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 1s
+      timeout: 1s
+      retries: 10
+
   monitor:
     build:
       context: .
@@ -28,7 +63,7 @@ services:
   user_postgres:
     container_name: user_pg_db
     ports:
-      - 5432:5432
+      - 5433:5432
     environment:
       - POSTGRES_PASSWORD=root
       - POSTGRES_USER=postgres
@@ -38,6 +73,20 @@ services:
     image: postgres:15-alpine
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 1s
+      timeout: 1s
+      retries: 10
+
+  transaction_redis:
+    container_name: transaction_redis_db
+    image: redis:7.2.3-alpine3.18
+    volumes:
+      - transaction-redis-data:/data
+    ports:
+      - 6379:6379
+    restart: always
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
       interval: 1s
       timeout: 1s
       retries: 10
@@ -97,5 +146,10 @@ services:
       - kafka
 
 volumes:
+  transaction-pg-data:
+    name: transaction-pg-data
+
+  transaction-redis-data:
+    name: transaction-redis-data
   user-pg-data:
     name: user-pg-data
