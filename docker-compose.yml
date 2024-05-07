@@ -80,6 +80,7 @@ services:
       - POSTGRES_DB=postgres
     volumes:
       - user-pg-data:/var/lib/postgresql/data
+      - .:/user/docker-entrypoint-initdb.d
     image: postgres:15-alpine
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres"]

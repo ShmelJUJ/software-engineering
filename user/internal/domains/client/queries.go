@@ -6,6 +6,6 @@ const (
 						WHERE user_id = $1::UUID;`
 
 	kGetWalletByUserId = `SELECT wallet_id, user_id, public_key, private_key
-							FROM public.wallets
+							FROM public.algorand_wallets
 							WHERE user_id = $1::UUID`
 )

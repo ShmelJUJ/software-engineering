@@ -4,8 +4,8 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/ShmelJUJ/software-engineering/user/internal/domains/client"
 	"github.com/ShmelJUJ/software-engineering/user/gen"
+	"github.com/ShmelJUJ/software-engineering/user/internal/domains/client"
 
 	"github.com/go-faster/sdk/zctx"
 	"go.uber.org/zap"
@@ -22,7 +22,7 @@ type Handler struct {
 
 func (h Handler) GetClientById(ctx context.Context, params user.GetClientByIdParams) (user.GetClientByIdRes, error) {
 	zctx.From(ctx).Info("GetClient", zap.Any("params", params))
-	repository, err := client.NewClientRepository(pgURL) //TODO наебашить конфиг для подключения к бд
+	repository, err := client.NewClientRepository(pgURL, ctx) //TODO наебашить конфиг для подключения к бд
 	var not_found *client.UserNotFoundError
 	if err != nil {
 
@@ -51,7 +51,7 @@ func (h Handler) GetClientById(ctx context.Context, params user.GetClientByIdPar
 
 func (h Handler) GetWalletById(ctx context.Context, params user.GetWalletByIdParams) (r user.GetWalletByIdRes, _ error) {
 	zctx.From(ctx).Info("GetClient", zap.Any("params", params))
-	repository, err := client.NewClientRepository(pgURL) //TODO наебашить конфиг для подключения к бд
+	repository, err := client.NewClientRepository(pgURL, ctx) //TODO наебашить конфиг для подключения к бд
 	var not_found *client.UserNotFoundError
 	if err != nil {
 

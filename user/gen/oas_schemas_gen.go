@@ -4,6 +4,7 @@ package user
 
 import (
 	"github.com/google/uuid"
+
 )
 
 // Ref: #/components/schemas/Error

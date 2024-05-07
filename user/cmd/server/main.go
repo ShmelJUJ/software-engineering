@@ -24,7 +24,7 @@ func main() {
 		var arg struct {
 			Addr string
 		}
-		flag.StringVar(&arg.Addr, "addr", "0.0.0.0:8080", "listen address") // TODO наебашить конфиг
+		flag.StringVar(&arg.Addr, "addr", ":8080", "listen address") // TODO наебашить конфиг
 		flag.Parse()
 
 		lg.Info("Initializing",
@@ -32,7 +32,6 @@ func main() {
 		)
 		oasServer, err := gen.NewServer(api.Handler{},
 			gen.WithTracerProvider(m.TracerProvider()),
-			gen.WithMeterProvider(m.MeterProvider()),
 		)
 		if err != nil {
 			return errors.Wrap(err, "server init")
@@ -49,6 +48,7 @@ func main() {
 				httpmiddleware.LogRequests(routeFinder),
 				httpmiddleware.Labeler(routeFinder),
 			),
+			IdleTimeout: time.Microsecond * 300,
 		}
 		g, ctx := errgroup.WithContext(ctx)
 		g.Go(func() error {
@@ -64,6 +64,7 @@ func main() {
 		g.Go(func() error {
 			defer lg.Info("Server stopped")
 			if err := httpServer.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
+				lg.Error("huita")
 				return errors.Wrap(err, "http")
 			}
 			return nil

@@ -3,7 +3,7 @@ package client
 import (
 	"fmt"
 
-	"github.com/google/uuid"
+	uuid "github.com/google/uuid"
 )
 
 type UserNotFoundError struct {
