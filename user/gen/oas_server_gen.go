@@ -8,6 +8,10 @@ import (
 
 // Handler handles operations described by OpenAPI v3 specification.
 type Handler interface {
+	// GetAuthToken implements GetAuthToken operation.
+	//
+	// POST /user/internal/v1/clients/auth
+	GetAuthToken(ctx context.Context, req OptAuthRequest) (GetAuthTokenRes, error)
 	// GetClientById implements GetClientById operation.
 	//
 	// GET /user/internal/v1/clients/{client_id}

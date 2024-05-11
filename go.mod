@@ -12,6 +12,7 @@ require (
 	github.com/alitto/pond v1.8.3
 	github.com/avito-tech/go-transaction-manager/drivers/pgxv5/v2 v2.0.0-rc8
 	github.com/avito-tech/go-transaction-manager/trm/v2 v2.0.0-rc8
+	github.com/chilts/sid v0.0.0-20190607042430-660e94789ec9
 	github.com/go-faster/errors v0.7.1
 	github.com/go-faster/jx v1.1.0
 	github.com/go-faster/sdk v0.15.0

@@ -7,7 +7,6 @@ import (
 	"net/url"
 
 	"github.com/go-faster/errors"
-	"github.com/google/uuid"
 
 	"github.com/ogen-go/ogen/conv"
 	"github.com/ogen-go/ogen/middleware"
@@ -19,7 +18,7 @@ import (
 // GetClientByIdParams is parameters of GetClientById operation.
 type GetClientByIdParams struct {
 	// Идентификатор.
-	ClientID uuid.UUID
+	ClientID string
 }
 
 func unpackGetClientByIdParams(packed middleware.Parameters) (params GetClientByIdParams) {
@@ -28,7 +27,7 @@ func unpackGetClientByIdParams(packed middleware.Parameters) (params GetClientBy
 			Name: "client_id",
 			In:   "path",
 		}
-		params.ClientID = packed[key].(uuid.UUID)
+		params.ClientID = packed[key].(string)
 	}
 	return params
 }
@@ -58,7 +57,7 @@ func decodeGetClientByIdParams(args [1]string, argsEscaped bool, r *http.Request
 					return err
 				}
 
-				c, err := conv.ToUUID(val)
+				c, err := conv.ToString(val)
 				if err != nil {
 					return err
 				}
@@ -85,9 +84,9 @@ func decodeGetClientByIdParams(args [1]string, argsEscaped bool, r *http.Request
 // GetWalletByIdParams is parameters of GetWalletById operation.
 type GetWalletByIdParams struct {
 	// Идентификатор пользователя.
-	ClientID uuid.UUID
+	ClientID string
 	// Идентификатор кошелька.
-	WalletID uuid.UUID
+	WalletID string
 }
 
 func unpackGetWalletByIdParams(packed middleware.Parameters) (params GetWalletByIdParams) {
@@ -96,14 +95,14 @@ func unpackGetWalletByIdParams(packed middleware.Parameters) (params GetWalletBy
 			Name: "client_id",
 			In:   "path",
 		}
-		params.ClientID = packed[key].(uuid.UUID)
+		params.ClientID = packed[key].(string)
 	}
 	{
 		key := middleware.ParameterKey{
 			Name: "wallet_id",
 			In:   "path",
 		}
-		params.WalletID = packed[key].(uuid.UUID)
+		params.WalletID = packed[key].(string)
 	}
 	return params
 }
@@ -133,7 +132,7 @@ func decodeGetWalletByIdParams(args [2]string, argsEscaped bool, r *http.Request
 					return err
 				}
 
-				c, err := conv.ToUUID(val)
+				c, err := conv.ToString(val)
 				if err != nil {
 					return err
 				}
@@ -178,7 +177,7 @@ func decodeGetWalletByIdParams(args [2]string, argsEscaped bool, r *http.Request
 					return err
 				}
 
-				c, err := conv.ToUUID(val)
+				c, err := conv.ToString(val)
 				if err != nil {
 					return err
 				}

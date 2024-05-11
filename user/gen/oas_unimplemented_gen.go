@@ -13,6 +13,13 @@ type UnimplementedHandler struct{}
 
 var _ Handler = UnimplementedHandler{}
 
+// GetAuthToken implements GetAuthToken operation.
+//
+// POST /user/internal/v1/clients/auth
+func (UnimplementedHandler) GetAuthToken(ctx context.Context, req OptAuthRequest) (r GetAuthTokenRes, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
 // GetClientById implements GetClientById operation.
 //
 // GET /user/internal/v1/clients/{client_id}

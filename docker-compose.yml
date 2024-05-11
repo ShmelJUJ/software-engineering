@@ -75,15 +75,15 @@ services:
     ports:
       - 5433:5432
     environment:
-      - POSTGRES_PASSWORD=root
-      - POSTGRES_USER=postgres
-      - POSTGRES_DB=postgres
+      - POSTGRES_PASSWORD=user_root
+      - POSTGRES_USER=user_service
+      - POSTGRES_DB=user_db
     volumes:
       - user-pg-data:/var/lib/postgresql/data
-      - .:/user/docker-entrypoint-initdb.d
+      - ./docker-entrypoint-initdb.d/init.sql:/docker-entrypoint-initdb.d/init.sql
     image: postgres:15-alpine
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      test: ["CMD-SHELL", "pg_isready -d user_db -U user_db"]
       interval: 1s
       timeout: 1s
       retries: 10

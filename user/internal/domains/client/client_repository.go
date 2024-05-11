@@ -9,7 +9,6 @@ import (
 	"github.com/go-faster/sdk/zctx"
 	"github.com/google/uuid"
 	pgx "github.com/jackc/pgx/v5"
-	"github.com/ogen-go/ogen/conv"
 )
 
 type ClientRepository struct {
@@ -18,10 +17,11 @@ type ClientRepository struct {
 }
 
 type UserColumns struct {
-	UserId    string `db:"user_id"`
-	FirstName string `db:"first_name"`
-	LastName  string `db:"last_name"`
-	Email     string `db:"email"`
+	UserId    uuid.UUID `db:"user_id"`
+	FirstName string    `db:"first_name"`
+	LastName  string    `db:"last_name"`
+	Email     string    `db:"email"`
+	Password  string    `db:"user_password"`
 }
 
 type WalletColumn struct {
@@ -49,7 +49,7 @@ func (repository *ClientRepository) GetClientById(id uuid.UUID) (Client, error) 
 	lg := zctx.From(repository.ctx)
 	if err != nil {
 		if err == pgx.ErrNoRows {
-			return Client{}, &UserNotFoundError{client_id: id}
+			return Client{}, &UserNotFoundError{client_id: id.String()}
 		}
 		lg.Error(err.Error())
 		return Client{}, err
@@ -67,23 +67,45 @@ func (repository *ClientRepository) GetClientById(id uuid.UUID) (Client, error) 
 
 		return Client{}, err
 	}
-	parsed_client_id, err := conv.ToUUID(client_record.UserId)
+
+	return NewClient(client_record.UserId, client_record.FirstName, client_record.LastName, client_record.Email, DecodePrivateData(client_record.Password), wallets), nil
+}
+
+func (repository *ClientRepository) GetClientByEmail(email string) (Client, error) {
+	row, err := repository.cluster.Pool.Query(repository.ctx, kGetClientByEmail, email)
+	lg := zctx.From(repository.ctx)
 	if err != nil {
+		if err == pgx.ErrNoRows {
+			return Client{}, &UserNotFoundError{client_id: email}
+		}
 		lg.Error(err.Error())
 		return Client{}, err
 	}
-	return NewClient(parsed_client_id, client_record.FirstName, client_record.LastName, client_record.Email, wallets), nil
+	defer row.Close()
+	client_record, err := pgx.CollectOneRow[UserColumns](row, pgx.RowToStructByName[UserColumns])
+	if err != nil {
+		lg.Error(err.Error())
+
+		return Client{}, err
+	}
+	wallets, err := repository.GetWalletsByUserId(client_record.UserId)
+	if err != nil {
+		lg.Error(err.Error())
+
+		return Client{}, err
+	}
+	return NewClient(client_record.UserId, client_record.FirstName, client_record.LastName, client_record.Email, DecodePrivateData(client_record.Password), wallets), nil
 }
 
-func DecodePrivateKey(private_key string) string {
-	dst := make([]byte, base64.StdEncoding.DecodedLen(len(private_key)))
-	n, err := base64.StdEncoding.Decode(dst, []byte(private_key))
+func DecodePrivateData(private_data string) string {
+	dst := make([]byte, base64.StdEncoding.DecodedLen(len(private_data)))
+	n, err := base64.StdEncoding.Decode(dst, []byte(private_data))
 	if err != nil {
 		fmt.Println("decode error:", err)
 		return ""
 	}
 	dst = dst[:n]
-	return fmt.Sprintf("%q\n", dst)
+	return fmt.Sprintf("%q", dst)
 }
 
 func (repository *ClientRepository) GetWalletsByUserId(id uuid.UUID) ([]wallet, error) {
@@ -91,7 +113,7 @@ func (repository *ClientRepository) GetWalletsByUserId(id uuid.UUID) ([]wallet, 
 	lg := zctx.From(repository.ctx)
 	if err != nil {
 		if err == pgx.ErrNoRows {
-			return nil, &UserNotFoundError{client_id: id}
+			return nil, &UserNotFoundError{client_id: id.String()}
 		}
 		lg.Error(err.Error())
 
@@ -102,7 +124,7 @@ func (repository *ClientRepository) GetWalletsByUserId(id uuid.UUID) ([]wallet, 
 	wallet_records, err := pgx.CollectRows[WalletColumn](rows, pgx.RowToStructByName[WalletColumn])
 	wallets := make([]wallet, 0)
 	for _, wallet_record := range wallet_records {
-		wallets = append(wallets, NewWallet(wallet_record.WalletId, wallet_record.PublicKey, DecodePrivateKey(wallet_record.PrivateKey)))
+		wallets = append(wallets, NewWallet(wallet_record.WalletId, wallet_record.PublicKey, DecodePrivateData(wallet_record.PrivateKey)))
 	}
 	return wallets, nil
 }
