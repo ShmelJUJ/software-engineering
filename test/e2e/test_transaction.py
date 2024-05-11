@@ -9,26 +9,31 @@ CREATE_TRANSACTION_PATH = "/transaction/create"
 
 
 DATA_TO_CREATE_TRANSACTION = {
-        "idempotency_token": "1234567890",
         "money_info": {
             "method": "bank_account",
             "currency": "USD",
             "amount": 100
         },
         "receiver": {
-            "user_id": "00000000-0000-0000-0000-000000000000"
+            "user_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6"
         },
-        "sender": {
-            "user_id": "11111111-1111-1111-1111-111111111111"
-        }
     }
 
 DATA_TO_ACCEPT_TRANSACTION = {
     "sender": {
-        "user_id": "11111111-1111-1111-1111-111111111111"
+        "user_id": "3fa85f64-5717-4562-b3fc-2c963f66afa7"
     }
 }
 
+DATA_TO_RETRIEVE_TRANSACTION = {
+    "amount": 100,
+    "currency": "USD",
+    "method": "bank_account",
+    "receiver": {
+        "user_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+    },
+    "status": "created"
+}
 
 
 def headers():
@@ -159,4 +164,4 @@ def test_edit_retrieve_transaction():
     assert retries > 0
     assert status_result["transaction_status"] == "created"
 
-    assert retrieve_transaction_send(id) == DATA_TO_CREATE_TRANSACTION
+    assert retrieve_transaction_send(id) == DATA_TO_RETRIEVE_TRANSACTION
