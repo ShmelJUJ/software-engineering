@@ -338,11 +338,16 @@ func TestAcceptTransaction(t *testing.T) {
 
 	ctx := context.Background()
 
-	transaction := &model.Transaction{
-		ID: "test-transaction",
-	}
 	sender := &model.TransactionUser{
 		ID: "test-user",
+	}
+	receiver := &model.TransactionUser{
+		ID: "test-user",
+	}
+	transaction := &model.Transaction{
+		ID:       "test-transaction",
+		Sender:   sender,
+		Receiver: receiver,
 	}
 
 	someErr := repository.NewAcceptTransactionError("test err", nil)

@@ -2,6 +2,7 @@
 CREATE TABLE IF NOT EXISTS transaction_users (
     transaction_user_id UUID PRIMARY KEY NOT NULL,
     user_id UUID NOT NULL,
+    wallet_id UUID NOT NULL,
     created_at TIMESTAMP NOT NULL,
     updated_at TIMESTAMP NOT NULL
 );

@@ -17,6 +17,7 @@ func TestFromCreateTransactionUserDTO(t *testing.T) {
 	}
 
 	userID := "test-user-id"
+	walletID := "test-wallet-id"
 
 	testcases := []struct {
 		name                    string
@@ -27,11 +28,13 @@ func TestFromCreateTransactionUserDTO(t *testing.T) {
 			name: "Successfully convert CreateTransactionUserDTO to user model",
 			args: args{
 				transactionUserDTO: &dto.CreateTransactionUserRequest{
-					UserID: (*strfmt.UUID)(&userID),
+					UserID:   (*strfmt.UUID)(&userID),
+					WalletID: (*strfmt.UUID)(&walletID),
 				},
 			},
 			expectedTransactionUser: &model.TransactionUser{
-				UserID: userID,
+				UserID:   userID,
+				WalletID: walletID,
 			},
 		},
 	}
@@ -56,6 +59,7 @@ func TestFromAcceptTransactionUserDTO(t *testing.T) {
 	}
 
 	userID := "test-user-id"
+	walletID := "test-wallet-id"
 
 	testcases := []struct {
 		name                    string
@@ -66,11 +70,13 @@ func TestFromAcceptTransactionUserDTO(t *testing.T) {
 			name: "Successfully convert CreateTransactionUserDTO to user model",
 			args: args{
 				transactionUserDTO: &dto.AcceptTransactionUserRequest{
-					UserID: (*strfmt.UUID)(&userID),
+					UserID:   (*strfmt.UUID)(&userID),
+					WalletID: (*strfmt.UUID)(&walletID),
 				},
 			},
 			expectedTransactionUser: &model.TransactionUser{
-				UserID: userID,
+				UserID:   userID,
+				WalletID: walletID,
 			},
 		},
 	}
@@ -92,6 +98,7 @@ func TestToGetTransactionUserDTO(t *testing.T) {
 
 	id := "test-id"
 	userID := "test-user-id"
+	walletID := "test-wallet-id"
 
 	testcases := []struct {
 		name                          string
@@ -101,11 +108,13 @@ func TestToGetTransactionUserDTO(t *testing.T) {
 		{
 			name: "Successfully convert CreateTransactionUserDTO to user model",
 			transactionUser: &model.TransactionUser{
-				ID:     id,
-				UserID: userID,
+				ID:       id,
+				UserID:   userID,
+				WalletID: walletID,
 			},
 			expectedGetTransactionUserDTO: &dto.GetTransactionUserResponse{
-				UserID: (*strfmt.UUID)(&userID),
+				UserID:   (*strfmt.UUID)(&userID),
+				WalletID: (*strfmt.UUID)(&walletID),
 			},
 		},
 	}

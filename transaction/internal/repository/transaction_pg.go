@@ -73,7 +73,7 @@ func (repo *transactionRepo) GetTransaction(ctx context.Context, transactionID s
 
 		transaction.Receiver = receiver
 
-		if transaction.SenderID == nil {
+		if transaction.SenderID != nil {
 			sender, err := repo.getTransactionUserInTx(ctx, *transaction.SenderID)
 			if err != nil {
 				return err

@@ -39,6 +39,7 @@ func getTransactionUserQuery(transactionUserID string) sq.SelectBuilder {
 		Select(
 			"transaction_user_id",
 			"user_id",
+			"wallet_id",
 			"created_at",
 			"updated_at",
 		).
@@ -81,12 +82,14 @@ func createTransactionUserQuery(transactionUser *model.TransactionUser) sq.Inser
 		Columns(
 			"transaction_user_id",
 			"user_id",
+			"wallet_id",
 			"created_at",
 			"updated_at",
 		).
 		Values(
 			transactionUser.ID,
 			transactionUser.UserID,
+			transactionUser.WalletID,
 			transactionUser.CreatedAt,
 			transactionUser.UpdatedAt,
 		)

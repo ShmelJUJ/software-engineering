@@ -35,6 +35,11 @@ func init() {
   "paths": {
     "/transaction/create": {
       "post": {
+        "security": [
+          {
+            "Bearer": []
+          }
+        ],
         "consumes": [
           "application/json"
         ],
@@ -91,8 +96,65 @@ func init() {
         }
       }
     },
+    "/transaction/login": {
+      "post": {
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "transaction"
+        ],
+        "summary": "The method is used to user login.",
+        "operationId": "login",
+        "parameters": [
+          {
+            "description": "Get login token.",
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/LoginRequest"
+            }
+          },
+          {
+            "type": "string",
+            "format": "uuid",
+            "name": "X-Idempotency-Key",
+            "in": "header"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "User successfully logined.",
+            "schema": {
+              "$ref": "#/definitions/LoginResponse"
+            }
+          },
+          "400": {
+            "description": "Validation error.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "Internal server error.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        }
+      }
+    },
     "/transaction/{id}/accept": {
       "post": {
+        "security": [
+          {
+            "Bearer": []
+          }
+        ],
         "produces": [
           "application/json"
         ],
@@ -153,6 +215,11 @@ func init() {
     },
     "/transaction/{id}/cancel": {
       "post": {
+        "security": [
+          {
+            "Bearer": []
+          }
+        ],
         "consumes": [
           "application/json"
         ],
@@ -216,6 +283,11 @@ func init() {
     },
     "/transaction/{id}/edit": {
       "post": {
+        "security": [
+          {
+            "Bearer": []
+          }
+        ],
         "consumes": [
           "application/json"
         ],
@@ -285,6 +357,11 @@ func init() {
     },
     "/transaction/{id}/retrieve": {
       "get": {
+        "security": [
+          {
+            "Bearer": []
+          }
+        ],
         "produces": [
           "application/json"
         ],
@@ -333,6 +410,11 @@ func init() {
     },
     "/transaction/{id}/retrieve/status": {
       "get": {
+        "security": [
+          {
+            "Bearer": []
+          }
+        ],
         "produces": [
           "application/json"
         ],
@@ -395,10 +477,15 @@ func init() {
     "AcceptTransactionUserRequest": {
       "type": "object",
       "required": [
-        "user_id"
+        "user_id",
+        "wallet_id"
       ],
       "properties": {
         "user_id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "wallet_id": {
           "type": "string",
           "format": "uuid"
         }
@@ -442,10 +529,15 @@ func init() {
     "CreateTransactionUserRequest": {
       "type": "object",
       "required": [
-        "user_id"
+        "user_id",
+        "wallet_id"
       ],
       "properties": {
         "user_id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "wallet_id": {
           "type": "string",
           "format": "uuid"
         }
@@ -545,12 +637,43 @@ func init() {
     "GetTransactionUserResponse": {
       "type": "object",
       "required": [
-        "user_id"
+        "user_id",
+        "wallet_id"
       ],
       "properties": {
         "user_id": {
           "type": "string",
           "format": "uuid"
+        },
+        "wallet_id": {
+          "type": "string",
+          "format": "uuid"
+        }
+      }
+    },
+    "LoginRequest": {
+      "type": "object",
+      "required": [
+        "email",
+        "password"
+      ],
+      "properties": {
+        "email": {
+          "type": "string"
+        },
+        "password": {
+          "type": "string"
+        }
+      }
+    },
+    "LoginResponse": {
+      "type": "object",
+      "required": [
+        "auth_token"
+      ],
+      "properties": {
+        "auth_token": {
+          "type": "string"
         }
       }
     },
@@ -573,6 +696,13 @@ func init() {
           "type": "string"
         }
       }
+    }
+  },
+  "securityDefinitions": {
+    "Bearer": {
+      "type": "apiKey",
+      "name": "Authorization",
+      "in": "header"
     }
   },
   "tags": [
@@ -600,6 +730,11 @@ func init() {
   "paths": {
     "/transaction/create": {
       "post": {
+        "security": [
+          {
+            "Bearer": []
+          }
+        ],
         "consumes": [
           "application/json"
         ],
@@ -656,8 +791,65 @@ func init() {
         }
       }
     },
+    "/transaction/login": {
+      "post": {
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "transaction"
+        ],
+        "summary": "The method is used to user login.",
+        "operationId": "login",
+        "parameters": [
+          {
+            "description": "Get login token.",
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/LoginRequest"
+            }
+          },
+          {
+            "type": "string",
+            "format": "uuid",
+            "name": "X-Idempotency-Key",
+            "in": "header"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "User successfully logined.",
+            "schema": {
+              "$ref": "#/definitions/LoginResponse"
+            }
+          },
+          "400": {
+            "description": "Validation error.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "Internal server error.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        }
+      }
+    },
     "/transaction/{id}/accept": {
       "post": {
+        "security": [
+          {
+            "Bearer": []
+          }
+        ],
         "produces": [
           "application/json"
         ],
@@ -718,6 +910,11 @@ func init() {
     },
     "/transaction/{id}/cancel": {
       "post": {
+        "security": [
+          {
+            "Bearer": []
+          }
+        ],
         "consumes": [
           "application/json"
         ],
@@ -781,6 +978,11 @@ func init() {
     },
     "/transaction/{id}/edit": {
       "post": {
+        "security": [
+          {
+            "Bearer": []
+          }
+        ],
         "consumes": [
           "application/json"
         ],
@@ -850,6 +1052,11 @@ func init() {
     },
     "/transaction/{id}/retrieve": {
       "get": {
+        "security": [
+          {
+            "Bearer": []
+          }
+        ],
         "produces": [
           "application/json"
         ],
@@ -898,6 +1105,11 @@ func init() {
     },
     "/transaction/{id}/retrieve/status": {
       "get": {
+        "security": [
+          {
+            "Bearer": []
+          }
+        ],
         "produces": [
           "application/json"
         ],
@@ -960,10 +1172,15 @@ func init() {
     "AcceptTransactionUserRequest": {
       "type": "object",
       "required": [
-        "user_id"
+        "user_id",
+        "wallet_id"
       ],
       "properties": {
         "user_id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "wallet_id": {
           "type": "string",
           "format": "uuid"
         }
@@ -1007,10 +1224,15 @@ func init() {
     "CreateTransactionUserRequest": {
       "type": "object",
       "required": [
-        "user_id"
+        "user_id",
+        "wallet_id"
       ],
       "properties": {
         "user_id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "wallet_id": {
           "type": "string",
           "format": "uuid"
         }
@@ -1110,12 +1332,43 @@ func init() {
     "GetTransactionUserResponse": {
       "type": "object",
       "required": [
-        "user_id"
+        "user_id",
+        "wallet_id"
       ],
       "properties": {
         "user_id": {
           "type": "string",
           "format": "uuid"
+        },
+        "wallet_id": {
+          "type": "string",
+          "format": "uuid"
+        }
+      }
+    },
+    "LoginRequest": {
+      "type": "object",
+      "required": [
+        "email",
+        "password"
+      ],
+      "properties": {
+        "email": {
+          "type": "string"
+        },
+        "password": {
+          "type": "string"
+        }
+      }
+    },
+    "LoginResponse": {
+      "type": "object",
+      "required": [
+        "auth_token"
+      ],
+      "properties": {
+        "auth_token": {
+          "type": "string"
         }
       }
     },
@@ -1138,6 +1391,13 @@ func init() {
           "type": "string"
         }
       }
+    }
+  },
+  "securityDefinitions": {
+    "Bearer": {
+      "type": "apiKey",
+      "name": "Authorization",
+      "in": "header"
     }
   },
   "tags": [

@@ -1,8 +1,11 @@
+grant all privileges on database user_db to user_service;
+
 CREATE TABLE IF NOT EXISTS public.users (
     user_id UUID NOT NULL PRIMARY KEY,
     first_name TEXT,
     last_name TEXT,
-    email TEXT
+    email TEXT NOT NULL,
+    user_password TEXT NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS public.algorand_wallets(
@@ -14,11 +17,11 @@ CREATE TABLE IF NOT EXISTS public.algorand_wallets(
 );
 
 INSERT INTO public.users
-(user_id, first_name, last_name, email)
+(user_id, first_name, last_name, email, user_password)
 VALUES
-('85e6a060-f914-48d1-b73a-23b7e6c81f46', 'Luffy', 'Monkey d.', 'luffy@example.com'),
-('65a8ed73-b6f3-4543-82a6-7ab9ef6e9c7b', 'Nami', '', 'nami@example.com'),
-('5eb05a37-cee1-46dd-bafc-c9d32ef95d59', 'Roger', 'Gol d.', 'goldroger@example.com');
+('85e6a060-f914-48d1-b73a-23b7e6c81f46', 'Luffy', 'Monkey d.', 'luffy@example.com', 'cGlyYXRla2luZw=='), -- passwd pirateking
+('65a8ed73-b6f3-4543-82a6-7ab9ef6e9c7b', 'Nami', '', 'nami@example.com', 'dHJlYXN1cmU='), -- passwd treasure
+('5eb05a37-cee1-46dd-bafc-c9d32ef95d59', 'Roger', 'Gol d.', 'goldroger@example.com', 'ZHJlYW1kcmVhbQ=='); -- passwd dreamdream
 
 INSERT INTO public.algorand_wallets
 (wallet_id, user_id, public_key, private_key)
