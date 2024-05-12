@@ -17,4 +17,4 @@ publisher:
     - kafka:29091
 
 user_client:
-  url: http://localhost:8081/
+  url: http://user:8080

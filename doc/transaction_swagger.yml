@@ -19,6 +19,8 @@ paths:
         - transaction
       summary: The method is used to accept the transaction.
       operationId: acceptTransaction
+      security:
+        - Bearer: []
       produces:
         - application/json
       parameters:
@@ -54,15 +56,14 @@ paths:
           description: Internal server error.
           schema:
             $ref: '#/definitions/ErrorResponse'
-      # security:
-      #   - qr_payment_auth:
-      #       - write:transactions
   /transaction/{id}/edit:
     post:
       tags:
         - transaction
       summary: The method is used to edit a transaction.
       operationId: editTransaction
+      security:
+        - Bearer: []
       consumes:
         - application/json
       produces:
@@ -104,15 +105,14 @@ paths:
           description: Internal server error.
           schema:
             $ref: '#/definitions/ErrorResponse'
-      # security:
-      #   - qr_payment_auth:
-      #       - write:transactions
   /transaction/{id}/cancel:
     post:
       tags:
         - transaction
       summary: The method is used to cancel a transaction.
       operationId: cancelTransaction
+      security:
+        - Bearer: []
       consumes:
         - application/json
       produces:
@@ -150,15 +150,14 @@ paths:
           description: Internal server error.
           schema:
             $ref: '#/definitions/ErrorResponse'
-      # security:
-      #   - qr_payment_auth:
-      #       - write:transactions
   /transaction/{id}/retrieve/status:
     get:
       tags:
         - transaction
       summary: The method is used to get the status of the transaction.
       operationId: retrieveTransactionStatus
+      security:
+        - Bearer: []
       produces:
         - application/json
       parameters:
@@ -185,15 +184,14 @@ paths:
           description: Internal server error.
           schema:
             $ref: '#/definitions/ErrorResponse'
-      # security:
-      #   - qr_payment_auth:
-      #       - read:transactions
   /transaction/{id}/retrieve:
     get:
       tags:
         - transaction
       summary: The method is used to retrieve the transaction.
       operationId: retrieveTransaction
+      security:
+        - Bearer: []
       produces:
         - application/json
       parameters:
@@ -220,15 +218,14 @@ paths:
           description: Internal server error.
           schema:
             $ref: '#/definitions/ErrorResponse'
-      # security:
-      #   - qr_payment_auth:
-      #       - read:transactions
   /transaction/create:
     post:
       tags:
         - transaction
       summary: The method is used to create transactions.
       operationId: createTransaction
+      security:
+        - Bearer: []
       consumes:
         - application/json
       produces:
@@ -262,18 +259,46 @@ paths:
           description: Internal server error.
           schema:
             $ref: '#/definitions/ErrorResponse'
-      # security:
-      #   - qr_payment_auth:
-      #       - write:transactions
-# securityDefinitions:
-#   qr_payment_auth:
-#     type: oauth2
-#     flow: accessCode
-#     authorizationUrl: 'https://accounts.google.com/o/oauth2/v2/auth'
-#     tokenUrl: 'https://www.googleapis.com/oauth2/v4/token'
-#     scopes:
-#       read:transactions: Read your transaction.
-#       write:transactions: Modify your transactions.
+  /transaction/login:
+    post:
+      tags:
+        - transaction
+      summary: The method is used to user login.
+      operationId: login
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - in: body
+          name: body
+          description: Get login token.
+          required: true
+          schema:
+            $ref: '#/definitions/LoginRequest'
+        - name: X-Idempotency-Key
+          in: header
+          required: false
+          type: string
+          format: uuid
+      responses:
+        '200':
+          description: User successfully logined.
+          schema:
+            $ref: '#/definitions/LoginResponse'
+        '400':
+          description: Validation error.
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        '500':
+          description: Internal server error.
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+securityDefinitions:  
+   Bearer:    
+     type: apiKey    
+     name: Authorization    
+     in: header
 definitions:
   ErrorResponse:
     type: object
@@ -282,6 +307,23 @@ definitions:
         type: integer
         format: int32
       message:
+        type: string
+  LoginRequest:
+    type: object
+    required:
+      - email
+      - password
+    properties:
+      email:
+        type: string
+      password:
+        type: string
+  LoginResponse:
+    type: object
+    required:
+      - auth_token
+    properties:
+      auth_token:
         type: string
   GetTransactionResponse:
     type: object
@@ -353,8 +395,12 @@ definitions:
     type: object
     required:
       - user_id
+      - wallet_id
     properties:
       user_id:
+        type: string
+        format: uuid
+      wallet_id:
         type: string
         format: uuid
   MoneyInfo:
@@ -385,15 +431,23 @@ definitions:
     type: object
     required:
      - user_id
+     - wallet_id
     properties:
       user_id:
+        type: string
+        format: uuid
+      wallet_id:
         type: string
         format: uuid
   CreateTransactionUserRequest:
     type: object
     required:
     - user_id
+    - wallet_id
     properties:
       user_id:
+        type: string
+        format: uuid
+      wallet_id:
         type: string
         format: uuid

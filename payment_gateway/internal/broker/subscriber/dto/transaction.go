@@ -23,11 +23,16 @@ func (t *Transaction) ToTransactionInfo() *gateway.TransactionInfo {
 	}
 }
 
+type TransactionUser struct {
+	UserID   string `json:"user_id"`
+	WalletID string `json:"wallet_id"`
+}
+
 // ProcessedTransaction represents a transaction that has been fully processed.
 type ProcessedTransaction struct {
-	Transaction *Transaction `json:"transaction"`
-	SenderID    string       `json:"sender_id"`
-	ReceiverID  string       `json:"receiver_id"`
+	Transaction *Transaction     `json:"transaction"`
+	Sender      *TransactionUser `json:"sender"`
+	Receiver    *TransactionUser `json:"receiver"`
 }
 
 // Decode populates a ProcessedTransaction object from JSON data.

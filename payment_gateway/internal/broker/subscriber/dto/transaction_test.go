@@ -69,7 +69,7 @@ func TestProcessedTransactionDecode(t *testing.T) {
 		{
 			name: "Successfully decode succeeded transaction",
 			args: args{
-				data: []byte(`{"transaction":{"transaction_id":"123","value":"v"},"sender_id":"456","receiver_id":"789"}`),
+				data: []byte(`{"transaction":{"transaction_id":"123","value":"v"},"sender":{"user_id":"456", "wallet_id":"789"},"receiver":{"user_id":"789", "wallet_id":"456"}}`),
 			},
 			transaction: &dto.ProcessedTransaction{},
 			expectedTransaction: &dto.ProcessedTransaction{
@@ -77,8 +77,14 @@ func TestProcessedTransactionDecode(t *testing.T) {
 					TransactionID: "123",
 					Value:         "v",
 				},
-				SenderID:   "456",
-				ReceiverID: "789",
+				Sender: &dto.TransactionUser{
+					UserID:   "456",
+					WalletID: "789",
+				},
+				Receiver: &dto.TransactionUser{
+					UserID:   "789",
+					WalletID: "456",
+				},
 			},
 			expectedErr: nil,
 		},

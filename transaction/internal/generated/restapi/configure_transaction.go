@@ -38,33 +38,51 @@ func configureAPI(api *operations.TransactionAPI) http.Handler {
 
 	api.JSONProducer = runtime.JSONProducer()
 
+	// Applies when the "Authorization" header is set
+	if api.BearerAuth == nil {
+		api.BearerAuth = func(token string) (interface{}, error) {
+			return nil, errors.NotImplemented("api key auth (Bearer) Authorization from header param [Authorization] has not yet been implemented")
+		}
+	}
+
+	// Set your custom authorizer if needed. Default one is security.Authorized()
+	// Expected interface runtime.Authorizer
+	//
+	// Example:
+	// api.APIAuthorizer = security.Authorized()
+
 	if api.TransactionAcceptTransactionHandler == nil {
-		api.TransactionAcceptTransactionHandler = transaction.AcceptTransactionHandlerFunc(func(params transaction.AcceptTransactionParams) middleware.Responder {
+		api.TransactionAcceptTransactionHandler = transaction.AcceptTransactionHandlerFunc(func(params transaction.AcceptTransactionParams, principal interface{}) middleware.Responder {
 			return middleware.NotImplemented("operation transaction.AcceptTransaction has not yet been implemented")
 		})
 	}
 	if api.TransactionCancelTransactionHandler == nil {
-		api.TransactionCancelTransactionHandler = transaction.CancelTransactionHandlerFunc(func(params transaction.CancelTransactionParams) middleware.Responder {
+		api.TransactionCancelTransactionHandler = transaction.CancelTransactionHandlerFunc(func(params transaction.CancelTransactionParams, principal interface{}) middleware.Responder {
 			return middleware.NotImplemented("operation transaction.CancelTransaction has not yet been implemented")
 		})
 	}
 	if api.TransactionCreateTransactionHandler == nil {
-		api.TransactionCreateTransactionHandler = transaction.CreateTransactionHandlerFunc(func(params transaction.CreateTransactionParams) middleware.Responder {
+		api.TransactionCreateTransactionHandler = transaction.CreateTransactionHandlerFunc(func(params transaction.CreateTransactionParams, principal interface{}) middleware.Responder {
 			return middleware.NotImplemented("operation transaction.CreateTransaction has not yet been implemented")
 		})
 	}
 	if api.TransactionEditTransactionHandler == nil {
-		api.TransactionEditTransactionHandler = transaction.EditTransactionHandlerFunc(func(params transaction.EditTransactionParams) middleware.Responder {
+		api.TransactionEditTransactionHandler = transaction.EditTransactionHandlerFunc(func(params transaction.EditTransactionParams, principal interface{}) middleware.Responder {
 			return middleware.NotImplemented("operation transaction.EditTransaction has not yet been implemented")
 		})
 	}
+	if api.TransactionLoginHandler == nil {
+		api.TransactionLoginHandler = transaction.LoginHandlerFunc(func(params transaction.LoginParams) middleware.Responder {
+			return middleware.NotImplemented("operation transaction.Login has not yet been implemented")
+		})
+	}
 	if api.TransactionRetrieveTransactionHandler == nil {
-		api.TransactionRetrieveTransactionHandler = transaction.RetrieveTransactionHandlerFunc(func(params transaction.RetrieveTransactionParams) middleware.Responder {
+		api.TransactionRetrieveTransactionHandler = transaction.RetrieveTransactionHandlerFunc(func(params transaction.RetrieveTransactionParams, principal interface{}) middleware.Responder {
 			return middleware.NotImplemented("operation transaction.RetrieveTransaction has not yet been implemented")
 		})
 	}
 	if api.TransactionRetrieveTransactionStatusHandler == nil {
-		api.TransactionRetrieveTransactionStatusHandler = transaction.RetrieveTransactionStatusHandlerFunc(func(params transaction.RetrieveTransactionStatusParams) middleware.Responder {
+		api.TransactionRetrieveTransactionStatusHandler = transaction.RetrieveTransactionStatusHandlerFunc(func(params transaction.RetrieveTransactionStatusParams, principal interface{}) middleware.Responder {
 			return middleware.NotImplemented("operation transaction.RetrieveTransactionStatus has not yet been implemented")
 		})
 	}

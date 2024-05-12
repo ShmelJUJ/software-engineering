@@ -155,45 +155,54 @@ func (s *TransactionSubscriber) getPaymentGateway(processedTransaction *dto.Proc
 
 		senderResp, err := s.monitorClient.Process(&monitor_client.ProcessParams{
 			Body: &models.ProcessRequest{
-				From:    &from,
-				To:      &to,
-				Method:  &method,
-				Payload: gen.GetWalletByIdParams{},
+				From:   &from,
+				To:     &to,
+				Method: &method,
+				Payload: gen.GetWalletByIdParams{
+					ClientID: processedTransaction.Sender.UserID,
+					WalletID: processedTransaction.Sender.WalletID,
+				},
 			},
 		})
 		if err != nil {
-			return nil, fmt.Errorf("failed to process getWalletById request to monitor: %w", err)
+			return nil, fmt.Errorf("failed to process sender getWalletById request to monitor: %w", err)
 		}
 
-		senderWallet, ok := senderResp.Payload.(gen.Wallet)
-		if !ok {
-			return nil, fmt.Errorf("failed to cast sender response to wallet: %w", err)
-		}
+		payload := senderResp.Payload.(map[string]interface{}) //nolint:errcheck // blya budu tut chto nado
+
+		senderPublicKey := payload["public_key"].(string)   //nolint:errcheck // blya budu tut chto nado
+		senderPrivateKey := payload["private_key"].(string) //nolint:errcheck // blya budu tut chto nado
 
 		receiverResp, err := s.monitorClient.Process(&monitor_client.ProcessParams{
 			Body: &models.ProcessRequest{
-				From:    &from,
-				To:      &to,
-				Method:  &method,
-				Payload: gen.GetWalletByIdParams{},
+				From:   &from,
+				To:     &to,
+				Method: &method,
+				Payload: gen.GetWalletByIdParams{
+					ClientID: processedTransaction.Receiver.UserID,
+					WalletID: processedTransaction.Receiver.WalletID,
+				},
 			},
 		})
-
-		receiverWallet, ok := receiverResp.Payload.(gen.Wallet)
-		if !ok {
-			return nil, fmt.Errorf("failed to cast receiver response to wallet: %w", err)
+		if err != nil {
+			return nil, fmt.Errorf("failed to process receiver getWalletById request to monitor: %w", err)
 		}
+
+		payload = receiverResp.Payload.(map[string]interface{}) //nolint:errcheck // blya budu tut chto nado
+
+		receiverPublicKey := payload["public_key"].(string)   //nolint:errcheck // blya budu tut chto nado
+		receiverPrivateKey := payload["private_key"].(string) //nolint:errcheck // blya budu tut chto nado
 
 		algorandGateway, err := algorand.New(
 			s.algorandCfg,
 			processedTransaction.Transaction.ToTransactionInfo(),
 			&algorand.UserData{
-				WalletAddress: senderWallet.PublicKey,
-				Mnemonic:      senderWallet.PrivateKey,
+				WalletAddress: senderPublicKey,
+				Mnemonic:      senderPrivateKey,
 			},
 			&algorand.UserData{
-				WalletAddress: receiverWallet.PublicKey,
-				Mnemonic:      receiverWallet.PrivateKey,
+				WalletAddress: receiverPublicKey,
+				Mnemonic:      receiverPrivateKey,
 			},
 		)
 		if err != nil {

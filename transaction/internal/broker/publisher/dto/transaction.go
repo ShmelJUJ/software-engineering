@@ -15,11 +15,16 @@ type Transaction struct {
 	PaymentMethod string `json:"payment_method"`
 }
 
+type TransactionUser struct {
+	UserID   string `json:"user_id"`
+	WalletID string `json:"wallet_id"`
+}
+
 // ProcessedTransaction represents a processed transaction, including the original transaction details, sender ID, and receiver ID.
 type ProcessedTransaction struct {
-	Transaction *Transaction `json:"transaction"`
-	SenderID    string       `json:"sender_id"`
-	ReceiverID  string       `json:"receiver_id"`
+	Transaction *Transaction     `json:"transaction"`
+	Sender      *TransactionUser `json:"sender"`
+	Receiver    *TransactionUser `json:"receiver"`
 }
 
 // Encode serializes a ProcessedTransaction into a JSON-encoded byte slice.
@@ -36,11 +41,6 @@ func (t *ProcessedTransaction) Encode() ([]byte, error) {
 func FromTransactionModel(transaction *model.Transaction) *ProcessedTransaction {
 	amount := strconv.Itoa(int(transaction.Amount))
 
-	var senderID string
-	if transaction.SenderID != nil {
-		senderID = *transaction.SenderID
-	}
-
 	return &ProcessedTransaction{
 		Transaction: &Transaction{
 			TransactionID: transaction.ID,
@@ -48,7 +48,13 @@ func FromTransactionModel(transaction *model.Transaction) *ProcessedTransaction 
 			Currency:      transaction.Currency,
 			PaymentMethod: transaction.Method,
 		},
-		SenderID:   senderID,
-		ReceiverID: transaction.ReceiverID,
+		Sender: &TransactionUser{
+			UserID:   transaction.Sender.UserID,
+			WalletID: transaction.Sender.WalletID,
+		},
+		Receiver: &TransactionUser{
+			UserID:   transaction.Receiver.UserID,
+			WalletID: transaction.Receiver.WalletID,
+		},
 	}
 }

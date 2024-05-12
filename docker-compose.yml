@@ -79,11 +79,11 @@ services:
       - POSTGRES_USER=user_service
       - POSTGRES_DB=user_db
     volumes:
-      - user-pg-data:/var/lib/postgresql/data
+      #- user-pg-data:/var/lib/postgresql/data
       - ./docker-entrypoint-initdb.d/init.sql:/docker-entrypoint-initdb.d/init.sql
     image: postgres:15-alpine
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -d user_db -U user_db"]
+      test: ["CMD-SHELL", "pg_isready -d user_db -U user_service"]
       interval: 1s
       timeout: 1s
       retries: 10
