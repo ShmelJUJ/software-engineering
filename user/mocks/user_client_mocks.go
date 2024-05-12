@@ -40,6 +40,21 @@ func (m *MockHandler) EXPECT() *MockHandlerMockRecorder {
 	return m.recorder
 }
 
+// GetAuthToken mocks base method.
+func (m *MockHandler) GetAuthToken(arg0 context.Context, arg1 user.OptAuthRequest) (user.GetAuthTokenRes, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetAuthToken", arg0, arg1)
+	ret0, _ := ret[0].(user.GetAuthTokenRes)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetAuthToken indicates an expected call of GetAuthToken.
+func (mr *MockHandlerMockRecorder) GetAuthToken(arg0, arg1 any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetAuthToken", reflect.TypeOf((*MockHandler)(nil).GetAuthToken), arg0, arg1)
+}
+
 // GetClientById mocks base method.
 func (m *MockHandler) GetClientById(arg0 context.Context, arg1 user.GetClientByIdParams) (user.GetClientByIdRes, error) {
 	m.ctrl.T.Helper()

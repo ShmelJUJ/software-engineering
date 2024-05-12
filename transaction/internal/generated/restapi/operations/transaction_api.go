@@ -44,24 +44,34 @@ func NewTransactionAPI(spec *loads.Document) *TransactionAPI {
 
 		JSONProducer: runtime.JSONProducer(),
 
-		TransactionAcceptTransactionHandler: transaction.AcceptTransactionHandlerFunc(func(params transaction.AcceptTransactionParams) middleware.Responder {
+		TransactionAcceptTransactionHandler: transaction.AcceptTransactionHandlerFunc(func(params transaction.AcceptTransactionParams, principal interface{}) middleware.Responder {
 			return middleware.NotImplemented("operation transaction.AcceptTransaction has not yet been implemented")
 		}),
-		TransactionCancelTransactionHandler: transaction.CancelTransactionHandlerFunc(func(params transaction.CancelTransactionParams) middleware.Responder {
+		TransactionCancelTransactionHandler: transaction.CancelTransactionHandlerFunc(func(params transaction.CancelTransactionParams, principal interface{}) middleware.Responder {
 			return middleware.NotImplemented("operation transaction.CancelTransaction has not yet been implemented")
 		}),
-		TransactionCreateTransactionHandler: transaction.CreateTransactionHandlerFunc(func(params transaction.CreateTransactionParams) middleware.Responder {
+		TransactionCreateTransactionHandler: transaction.CreateTransactionHandlerFunc(func(params transaction.CreateTransactionParams, principal interface{}) middleware.Responder {
 			return middleware.NotImplemented("operation transaction.CreateTransaction has not yet been implemented")
 		}),
-		TransactionEditTransactionHandler: transaction.EditTransactionHandlerFunc(func(params transaction.EditTransactionParams) middleware.Responder {
+		TransactionEditTransactionHandler: transaction.EditTransactionHandlerFunc(func(params transaction.EditTransactionParams, principal interface{}) middleware.Responder {
 			return middleware.NotImplemented("operation transaction.EditTransaction has not yet been implemented")
 		}),
-		TransactionRetrieveTransactionHandler: transaction.RetrieveTransactionHandlerFunc(func(params transaction.RetrieveTransactionParams) middleware.Responder {
+		TransactionLoginHandler: transaction.LoginHandlerFunc(func(params transaction.LoginParams) middleware.Responder {
+			return middleware.NotImplemented("operation transaction.Login has not yet been implemented")
+		}),
+		TransactionRetrieveTransactionHandler: transaction.RetrieveTransactionHandlerFunc(func(params transaction.RetrieveTransactionParams, principal interface{}) middleware.Responder {
 			return middleware.NotImplemented("operation transaction.RetrieveTransaction has not yet been implemented")
 		}),
-		TransactionRetrieveTransactionStatusHandler: transaction.RetrieveTransactionStatusHandlerFunc(func(params transaction.RetrieveTransactionStatusParams) middleware.Responder {
+		TransactionRetrieveTransactionStatusHandler: transaction.RetrieveTransactionStatusHandlerFunc(func(params transaction.RetrieveTransactionStatusParams, principal interface{}) middleware.Responder {
 			return middleware.NotImplemented("operation transaction.RetrieveTransactionStatus has not yet been implemented")
 		}),
+
+		// Applies when the "Authorization" header is set
+		BearerAuth: func(token string) (interface{}, error) {
+			return nil, errors.NotImplemented("api key auth (Bearer) Authorization from header param [Authorization] has not yet been implemented")
+		},
+		// default authorizer is authorized meaning no requests are blocked
+		APIAuthorizer: security.Authorized(),
 	}
 }
 
@@ -98,6 +108,13 @@ type TransactionAPI struct {
 	//   - application/json
 	JSONProducer runtime.Producer
 
+	// BearerAuth registers a function that takes a token and returns a principal
+	// it performs authentication based on an api key Authorization provided in the header
+	BearerAuth func(string) (interface{}, error)
+
+	// APIAuthorizer provides access control (ACL/RBAC/ABAC) by providing access to the request and authenticated principal
+	APIAuthorizer runtime.Authorizer
+
 	// TransactionAcceptTransactionHandler sets the operation handler for the accept transaction operation
 	TransactionAcceptTransactionHandler transaction.AcceptTransactionHandler
 	// TransactionCancelTransactionHandler sets the operation handler for the cancel transaction operation
@@ -106,6 +123,8 @@ type TransactionAPI struct {
 	TransactionCreateTransactionHandler transaction.CreateTransactionHandler
 	// TransactionEditTransactionHandler sets the operation handler for the edit transaction operation
 	TransactionEditTransactionHandler transaction.EditTransactionHandler
+	// TransactionLoginHandler sets the operation handler for the login operation
+	TransactionLoginHandler transaction.LoginHandler
 	// TransactionRetrieveTransactionHandler sets the operation handler for the retrieve transaction operation
 	TransactionRetrieveTransactionHandler transaction.RetrieveTransactionHandler
 	// TransactionRetrieveTransactionStatusHandler sets the operation handler for the retrieve transaction status operation
@@ -187,6 +206,10 @@ func (o *TransactionAPI) Validate() error {
 		unregistered = append(unregistered, "JSONProducer")
 	}
 
+	if o.BearerAuth == nil {
+		unregistered = append(unregistered, "AuthorizationAuth")
+	}
+
 	if o.TransactionAcceptTransactionHandler == nil {
 		unregistered = append(unregistered, "transaction.AcceptTransactionHandler")
 	}
@@ -198,6 +221,9 @@ func (o *TransactionAPI) Validate() error {
 	}
 	if o.TransactionEditTransactionHandler == nil {
 		unregistered = append(unregistered, "transaction.EditTransactionHandler")
+	}
+	if o.TransactionLoginHandler == nil {
+		unregistered = append(unregistered, "transaction.LoginHandler")
 	}
 	if o.TransactionRetrieveTransactionHandler == nil {
 		unregistered = append(unregistered, "transaction.RetrieveTransactionHandler")
@@ -220,12 +246,21 @@ func (o *TransactionAPI) ServeErrorFor(operationID string) func(http.ResponseWri
 
 // AuthenticatorsFor gets the authenticators for the specified security schemes
 func (o *TransactionAPI) AuthenticatorsFor(schemes map[string]spec.SecurityScheme) map[string]runtime.Authenticator {
-	return nil
+	result := make(map[string]runtime.Authenticator)
+	for name := range schemes {
+		switch name {
+		case "Bearer":
+			scheme := schemes[name]
+			result[name] = o.APIKeyAuthenticator(scheme.Name, scheme.In, o.BearerAuth)
+
+		}
+	}
+	return result
 }
 
 // Authorizer returns the registered authorizer
 func (o *TransactionAPI) Authorizer() runtime.Authorizer {
-	return nil
+	return o.APIAuthorizer
 }
 
 // ConsumersFor gets the consumers for the specified media types.
@@ -309,6 +344,10 @@ func (o *TransactionAPI) initHandlerCache() {
 		o.handlers["POST"] = make(map[string]http.Handler)
 	}
 	o.handlers["POST"]["/transaction/{id}/edit"] = transaction.NewEditTransaction(o.context, o.TransactionEditTransactionHandler)
+	if o.handlers["POST"] == nil {
+		o.handlers["POST"] = make(map[string]http.Handler)
+	}
+	o.handlers["POST"]["/transaction/login"] = transaction.NewLogin(o.context, o.TransactionLoginHandler)
 	if o.handlers["GET"] == nil {
 		o.handlers["GET"] = make(map[string]http.Handler)
 	}

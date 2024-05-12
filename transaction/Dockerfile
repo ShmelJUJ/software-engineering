@@ -8,6 +8,7 @@ RUN go mod download
 FROM golang:1.22-alpine3.19 as builder
 COPY --from=modules /go/pkg /go/pkg
 COPY ./transaction/config /app/config
+COPY ./user/gen /app/user/gen
 COPY ./pkg /app/pkg
 COPY ./transaction /app/transaction
 COPY go.mod go.sum /app/

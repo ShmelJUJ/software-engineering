@@ -11,7 +11,7 @@ import (
 	"go.uber.org/zap"
 )
 
-const pgURL = "postgres://user_service:user_root@user_postgres:5432/postgres?sslmode=disable"
+const pgURL = "postgres://user_service:user_root@user_postgres:5432/user_db?sslmode=disable"
 
 // Compile-time check for Handler.
 var _ user.Handler = (*Handler)(nil)
