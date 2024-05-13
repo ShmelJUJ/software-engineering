@@ -47,7 +47,9 @@ gen-monitor-client:
 .PHONY: gen-monitor-client
 
 gen-user:
+	cd user
 	go generate -run github.com/ogen-go/ogen/cmd/ogen@latest ./...
+	cd ..
 .PHONY: gen-user
 
 # ==============================================================================

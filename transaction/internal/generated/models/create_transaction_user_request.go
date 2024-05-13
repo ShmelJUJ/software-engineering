@@ -23,6 +23,11 @@ type CreateTransactionUserRequest struct {
 	// Required: true
 	// Format: uuid
 	UserID *strfmt.UUID `json:"user_id"`
+
+	// wallet id
+	// Required: true
+	// Format: uuid
+	WalletID *strfmt.UUID `json:"wallet_id"`
 }
 
 // Validate validates this create transaction user request
@@ -30,6 +35,10 @@ func (m *CreateTransactionUserRequest) Validate(formats strfmt.Registry) error {
 	var res []error
 
 	if err := m.validateUserID(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := m.validateWalletID(formats); err != nil {
 		res = append(res, err)
 	}
 
@@ -46,6 +55,19 @@ func (m *CreateTransactionUserRequest) validateUserID(formats strfmt.Registry) e
 	}
 
 	if err := validate.FormatOf("user_id", "body", "uuid", m.UserID.String(), formats); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (m *CreateTransactionUserRequest) validateWalletID(formats strfmt.Registry) error {
+
+	if err := validate.Required("wallet_id", "body", m.WalletID); err != nil {
+		return err
+	}
+
+	if err := validate.FormatOf("wallet_id", "body", "uuid", m.WalletID.String(), formats); err != nil {
 		return err
 	}
 

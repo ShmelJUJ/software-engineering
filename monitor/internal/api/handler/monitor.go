@@ -15,9 +15,11 @@ import (
 const (
 	paymentGatewayService = "payment_gateway"
 	userService           = "user"
+	transactionService    = "transaction"
 
 	getUserMethod   = "getClientByID"
 	getWalletMethod = "getWalletByID"
+	loginMethod     = "login"
 )
 
 // MonitorHandler handles incoming requests for monitoring.
@@ -60,6 +62,10 @@ func (mh *MonitorHandler) ProcessHandler(params apiMonitor.ProcessParams) middle
 
 func verify(from, to, method string) bool {
 	if from == paymentGatewayService && to == userService && (method == getUserMethod || method == getWalletMethod) {
+		return true
+	}
+
+	if from == transactionService && to == userService && method == loginMethod {
 		return true
 	}
 
@@ -135,6 +141,47 @@ func (mh *MonitorHandler) processRequest(params apiMonitor.ProcessParams) middle
 					WithPayload(&models.ErrorResponse{
 						Code:    int32(apiMonitor.ProcessInternalServerErrorCode),
 						Message: "failed to cast method info type to *get.Wallet",
+					})
+			}
+
+		case loginMethod:
+			dto := &gen.AuthRequest{}
+
+			if err := mapstructure.Decode(params.Body.Payload, dto); err != nil {
+				return apiMonitor.NewProcessBadRequest().
+					WithPayload(&models.ErrorResponse{
+						Code:    int32(apiMonitor.ProcessBadRequestCode),
+						Message: fmt.Sprintf("failed to decode payload to gen.AuthRequest: %s", err.Error()),
+					})
+			}
+
+			getTokenRes, err := mh.userClient.GetAuthToken(ctx, gen.OptAuthRequest{
+				Value: *dto,
+				Set:   true,
+			})
+			if err != nil {
+				return apiMonitor.NewProcessInternalServerError().
+					WithPayload(&models.ErrorResponse{
+						Code:    int32(apiMonitor.ProcessInternalServerErrorCode),
+						Message: fmt.Sprintf("failed to get auth token: %s", err.Error()),
+					})
+			}
+
+			switch t := getTokenRes.(type) {
+			case *gen.AuthResponse:
+				return apiMonitor.NewProcessOK().
+					WithPayload(t)
+			case *gen.GetAuthTokenBadRequest, *gen.GetAuthTokenForbidden, *gen.GetAuthTokenInternalServerError:
+				return apiMonitor.NewProcessInternalServerError().
+					WithPayload(&models.ErrorResponse{
+						Code:    int32(apiMonitor.ProcessInternalServerErrorCode),
+						Message: fmt.Sprintf("failed to get auth token: %s", t),
+					})
+			default:
+				return apiMonitor.NewProcessInternalServerError().
+					WithPayload(&models.ErrorResponse{
+						Code:    int32(apiMonitor.ProcessInternalServerErrorCode),
+						Message: "failed to cast method info type to *get.AuthResponse",
 					})
 			}
 

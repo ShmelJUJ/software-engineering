@@ -122,6 +122,7 @@ func Run(cfg *config.Config) {
 			NumPartitions:     int32(cfg.SubscriberCfg.TopicDetails.NumPartitions),
 			ReplicationFactor: int16(cfg.SubscriberCfg.TopicDetails.ReplicationFactor),
 		}),
+		kafka.WithSubscriberConsumerGroup("monitor"),
 	)
 	if err != nil {
 		l.Fatal("failed to create kafka subscriber", map[string]interface{}{

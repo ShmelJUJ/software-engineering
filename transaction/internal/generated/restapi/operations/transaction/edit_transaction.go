@@ -12,16 +12,16 @@ import (
 )
 
 // EditTransactionHandlerFunc turns a function with the right signature into a edit transaction handler
-type EditTransactionHandlerFunc func(EditTransactionParams) middleware.Responder
+type EditTransactionHandlerFunc func(EditTransactionParams, interface{}) middleware.Responder
 
 // Handle executing the request and returning a response
-func (fn EditTransactionHandlerFunc) Handle(params EditTransactionParams) middleware.Responder {
-	return fn(params)
+func (fn EditTransactionHandlerFunc) Handle(params EditTransactionParams, principal interface{}) middleware.Responder {
+	return fn(params, principal)
 }
 
 // EditTransactionHandler interface for that can handle valid edit transaction params
 type EditTransactionHandler interface {
-	Handle(EditTransactionParams) middleware.Responder
+	Handle(EditTransactionParams, interface{}) middleware.Responder
 }
 
 // NewEditTransaction creates a new http.Handler for the edit transaction operation
@@ -45,12 +45,25 @@ func (o *EditTransaction) ServeHTTP(rw http.ResponseWriter, r *http.Request) {
 		*r = *rCtx
 	}
 	var Params = NewEditTransactionParams()
+	uprinc, aCtx, err := o.Context.Authorize(r, route)
+	if err != nil {
+		o.Context.Respond(rw, r, route.Produces, route, err)
+		return
+	}
+	if aCtx != nil {
+		*r = *aCtx
+	}
+	var principal interface{}
+	if uprinc != nil {
+		principal = uprinc.(interface{}) // this is really a interface{}, I promise
+	}
+
 	if err := o.Context.BindValidRequest(r, route, &Params); err != nil { // bind params
 		o.Context.Respond(rw, r, route.Produces, route, err)
 		return
 	}
 
-	res := o.Handler.Handle(Params) // actually handle the request
+	res := o.Handler.Handle(Params, principal) // actually handle the request
 	o.Context.Respond(rw, r, route.Produces, route, res)
 
 }

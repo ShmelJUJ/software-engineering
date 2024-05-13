@@ -18,4 +18,4 @@ RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 \
 FROM scratch
 COPY --from=builder /bin/app /app
 COPY --from=builder /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
-CMD ["/app", "--addr", "0.0.0.0:8081"]
+ENTRYPOINT ["/app"]

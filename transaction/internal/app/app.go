@@ -18,7 +18,10 @@ import (
 
 	apiTransaction "github.com/ShmelJUJ/software-engineering/transaction/internal/generated/restapi/operations/transaction"
 
+	monitor_client "github.com/ShmelJUJ/software-engineering/pkg/monitor_client/client"
 	"github.com/go-openapi/loads"
+	httptransport "github.com/go-openapi/runtime/client"
+	"github.com/go-openapi/strfmt"
 
 	"github.com/ShmelJUJ/software-engineering/pkg/kafka"
 	"github.com/ShmelJUJ/software-engineering/pkg/logger"
@@ -84,6 +87,15 @@ func Run(cfg *config.Config) {
 	}
 	defer r.Close()
 
+	monitorClientCfg := monitor_client.DefaultTransportConfig().
+		WithBasePath("api/v1").
+		WithHost("host.docker.internal:8080").
+		WithSchemes([]string{"http"})
+
+	transport := httptransport.New(monitorClientCfg.Host, monitorClientCfg.BasePath, monitorClientCfg.Schemes)
+
+	monitorClient := monitor_client.New(transport, strfmt.Default)
+
 	kafkaPublisher, err := kafka.NewPublisher(cfg.PublisherCfg.Brokers)
 	if err != nil {
 		l.Fatal("failed to create kafka publisher", map[string]interface{}{
@@ -106,16 +118,12 @@ func Run(cfg *config.Config) {
 
 	transactionRepo := repository.NewTransactionRepo(pg, l)
 	transactionUsecase := usecase.NewTransactionUsecase(transactionRepo, transactionPublisher, l)
-	transactionHandler := handler.NewTransactionHandler(transactionUsecase, l)
-
-	api := operations.NewTransactionAPI(swaggerSpec)
-
-	api.TransactionAcceptTransactionHandler = apiTransaction.AcceptTransactionHandlerFunc(transactionHandler.AcceptTransactionHandler)
-	api.TransactionCancelTransactionHandler = apiTransaction.CancelTransactionHandlerFunc(transactionHandler.CancelTransactionHandler)
-	api.TransactionCreateTransactionHandler = apiTransaction.CreateTransactionHandlerFunc(transactionHandler.CreateTransactionHandler)
-	api.TransactionEditTransactionHandler = apiTransaction.EditTransactionHandlerFunc(transactionHandler.EditTransactionHandler)
-	api.TransactionRetrieveTransactionHandler = apiTransaction.RetrieveTransactionHandlerFunc(transactionHandler.RetrieveTransactionHandler)
-	api.TransactionRetrieveTransactionStatusHandler = apiTransaction.RetrieveTransactionStatusHandlerFunc(transactionHandler.RetrieveTransactionStatusHandler)
+	transactionHandler := handler.NewTransactionHandler(
+		transactionUsecase,
+		l,
+		monitorClient.Monitor,
+		r,
+	)
 
 	middlewareManager, err := middleware.NewMiddlewareManager(&middleware.Config{
 		IdempotencyCfg: &middleware.IdempotencyConfig{
@@ -128,6 +136,17 @@ func Run(cfg *config.Config) {
 			"error": err,
 		})
 	}
+
+	api := operations.NewTransactionAPI(swaggerSpec)
+
+	api.BearerAuth = transactionHandler.VerifyAuthToken
+	api.TransactionAcceptTransactionHandler = apiTransaction.AcceptTransactionHandlerFunc(transactionHandler.AcceptTransactionHandler)
+	api.TransactionCancelTransactionHandler = apiTransaction.CancelTransactionHandlerFunc(transactionHandler.CancelTransactionHandler)
+	api.TransactionCreateTransactionHandler = apiTransaction.CreateTransactionHandlerFunc(transactionHandler.CreateTransactionHandler)
+	api.TransactionEditTransactionHandler = apiTransaction.EditTransactionHandlerFunc(transactionHandler.EditTransactionHandler)
+	api.TransactionRetrieveTransactionHandler = apiTransaction.RetrieveTransactionHandlerFunc(transactionHandler.RetrieveTransactionHandler)
+	api.TransactionRetrieveTransactionStatusHandler = apiTransaction.RetrieveTransactionStatusHandlerFunc(transactionHandler.RetrieveTransactionStatusHandler)
+	api.TransactionLoginHandler = apiTransaction.LoginHandlerFunc(transactionHandler.LoginHandler)
 
 	middlewareManager.AddIdempotenceMiddleware()
 	middlewareManager.SetupGlobalMiddleware(swaggerSpec, api)
@@ -177,6 +196,7 @@ func Run(cfg *config.Config) {
 			NumPartitions:     int32(cfg.SubscriberCfg.TopicDetails.NumPartitions),
 			ReplicationFactor: int16(cfg.SubscriberCfg.TopicDetails.ReplicationFactor),
 		}),
+		kafka.WithSubscriberConsumerGroup("transaction"),
 	)
 	if err != nil {
 		l.Fatal("failed to create kafka subscriber", map[string]interface{}{

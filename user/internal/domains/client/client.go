@@ -1,6 +1,11 @@
 package client
 
-import "github.com/google/uuid"
+import (
+	"fmt"
+
+	"github.com/chilts/sid"
+	"github.com/google/uuid"
+)
 
 type wallet struct {
 	wallet_id   uuid.UUID
@@ -10,6 +15,7 @@ type wallet struct {
 
 type Client struct {
 	client_id         uuid.UUID
+	password          string
 	client_first_name string
 	client_last_name  string
 	email             string
@@ -19,12 +25,13 @@ type Client struct {
 func NewClient(client_id uuid.UUID,
 	client_first_name string,
 	client_last_name string,
-	email string, wallets []wallet,
+	email string, password string, wallets []wallet,
 ) (client Client) {
 	client.client_id = client_id
 	client.client_first_name = client_first_name
 	client.client_last_name = client_last_name
 	client.email = email
+	client.password = password
 	client.wallets = wallets
 	return client
 }
@@ -47,6 +54,13 @@ func (client *Client) GetEmail() string {
 
 func (client *Client) GetWallets() []wallet {
 	return client.wallets
+}
+
+func (client *Client) GetAuthToken(password string) (string, error) {
+	if fmt.Sprintf("%q", password) != client.password {
+		return "", &WrongPasswordError{client_id: client.client_id}
+	}
+	return sid.Id(), nil
 }
 
 func NewWallet(wallet_id uuid.UUID, public_key string, private_key string) wallet {

@@ -6,6 +6,49 @@ import (
 	"github.com/google/uuid"
 )
 
+// Ref: #/components/schemas/AuthRequest
+type AuthRequest struct {
+	Email    string `json:"email"`
+	Password string `json:"password"`
+}
+
+// GetEmail returns the value of Email.
+func (s *AuthRequest) GetEmail() string {
+	return s.Email
+}
+
+// GetPassword returns the value of Password.
+func (s *AuthRequest) GetPassword() string {
+	return s.Password
+}
+
+// SetEmail sets the value of Email.
+func (s *AuthRequest) SetEmail(val string) {
+	s.Email = val
+}
+
+// SetPassword sets the value of Password.
+func (s *AuthRequest) SetPassword(val string) {
+	s.Password = val
+}
+
+// Ref: #/components/schemas/AuthResponse
+type AuthResponse struct {
+	AuthToken string `json:"auth_token"`
+}
+
+// GetAuthToken returns the value of AuthToken.
+func (s *AuthResponse) GetAuthToken() string {
+	return s.AuthToken
+}
+
+// SetAuthToken sets the value of AuthToken.
+func (s *AuthResponse) SetAuthToken(val string) {
+	s.AuthToken = val
+}
+
+func (*AuthResponse) getAuthTokenRes() {}
+
 // Ref: #/components/schemas/Error
 type Error struct {
 	// Human-redable error message.
@@ -34,9 +77,29 @@ func (s *Error) SetCode(val string) {
 	s.Code = val
 }
 
+type GetAuthTokenBadRequest Error
+
+func (*GetAuthTokenBadRequest) getAuthTokenRes() {}
+
+type GetAuthTokenForbidden Error
+
+func (*GetAuthTokenForbidden) getAuthTokenRes() {}
+
+type GetAuthTokenInternalServerError Error
+
+func (*GetAuthTokenInternalServerError) getAuthTokenRes() {}
+
+type GetAuthTokenNotFound Error
+
+func (*GetAuthTokenNotFound) getAuthTokenRes() {}
+
 type GetClientByIdBadRequest Error
 
 func (*GetClientByIdBadRequest) getClientByIdRes() {}
+
+type GetClientByIdInternalServerError Error
+
+func (*GetClientByIdInternalServerError) getClientByIdRes() {}
 
 type GetClientByIdNotFound Error
 
@@ -46,9 +109,59 @@ type GetWalletByIdBadRequest Error
 
 func (*GetWalletByIdBadRequest) getWalletByIdRes() {}
 
+type GetWalletByIdInternalServerError Error
+
+func (*GetWalletByIdInternalServerError) getWalletByIdRes() {}
+
 type GetWalletByIdNotFound Error
 
 func (*GetWalletByIdNotFound) getWalletByIdRes() {}
+
+// NewOptAuthRequest returns new OptAuthRequest with value set to v.
+func NewOptAuthRequest(v AuthRequest) OptAuthRequest {
+	return OptAuthRequest{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptAuthRequest is optional AuthRequest.
+type OptAuthRequest struct {
+	Value AuthRequest
+	Set   bool
+}
+
+// IsSet returns true if OptAuthRequest was set.
+func (o OptAuthRequest) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptAuthRequest) Reset() {
+	var v AuthRequest
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptAuthRequest) SetTo(v AuthRequest) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptAuthRequest) Get() (v AuthRequest, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptAuthRequest) Or(d AuthRequest) AuthRequest {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
 
 // NewOptString returns new OptString with value set to v.
 func NewOptString(v string) OptString {
