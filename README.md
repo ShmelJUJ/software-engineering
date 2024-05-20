@@ -89,3 +89,7 @@ Backend система оплаты через QR коды. Программно
 ## Карта здоровья ИТ-проекта
 
 https://docs.google.com/spreadsheets/d/1NFYdzP-s8rPzLp-JMxeqExbYZbgCdgFmjBpAcQE9rN4/edit?usp=sharing
+
+## Draw io
+
+https://drive.google.com/file/d/1bpc8uGlBVr7oEz4GABSWPcLvyC-9ss_e/view?usp=sharing
